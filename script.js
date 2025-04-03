@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageGrid = document.getElementById('imageGrid');
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
-    const nextBtn = document.getElementById('nextBtn');
     const referenceImage = document.getElementById('reference');
 
     let selectedImages = [];
@@ -35,10 +34,11 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     // Function to create image comparison container
-    function createImageComparison(generatedImageSrc, referenceImageSrc) {
+    function createImageComparison(generatedImageSrc, referenceImageSrc, index) {
         const container = document.createElement('div');
         container.className = 'image-container';
-        container.setAttribute('data-index', generatedImageSrc);
+        container.setAttribute('data-index', index);
+        container.setAttribute('data-image-id', index);
         
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Slider input
         const slider = document.createElement('input');
         slider.type = 'range';
-        slider.className = 'comparison-slider';
+        slider.className = 'slider';
         slider.min = '0';
         slider.max = '100';
         slider.value = '100';
@@ -95,18 +95,16 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedImages = [];
         currentRank = 1;
         rankingOrder = [];
-        nextBtn.disabled = true;
 
         // Add the 7 generated images with comparison sliders
         generatedImageSources.forEach((generatedImageSrc, index) => {
             const referenceImageSrc = 'images/image1/ref.png';
             
-            const container = createImageComparison(generatedImageSrc, referenceImageSrc);
-            container.dataset.imageId = index + 1;
+            const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
 
             container.addEventListener('click', (e) => {
                 // Only handle click if not clicking on slider
-                if (!e.target.classList.contains('comparison-slider')) {
+                if (!e.target.classList.contains('slider')) {
                     handleImageClick(container);
                 }
             });
@@ -121,57 +119,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         container.classList.add('selected');
         container.dataset.rank = currentRank;
-
-        // Add to ranking list
-        const rankItem = document.createElement('div');
-        rankItem.className = 'rank-item';
-        rankItem.innerHTML = `
-            <span>${currentRank}.</span>
-            <img src="${container.querySelector('.generated-image').src}" alt="">
-        `;
-        rankingList.appendChild(rankItem);
-
-        selectedImages.push({
-            imageId: container.dataset.imageId,
-            imageName: imageNames[parseInt(container.dataset.imageId) - 1],
-            rank: currentRank
-        });
-
-        currentRank++;
-
-        // Enable submit button when all images are ranked
-        if (selectedImages.length === 7) {
-            nextBtn.disabled = false;
+        
+        const imageId = container.getAttribute('data-image-id');
+        if (!rankingOrder.includes(imageId)) {
+            rankingOrder.push(imageId);
+            selectedImages.push({
+                imageId: imageId,
+                imageName: imageNames[parseInt(imageId)],
+                rank: currentRank
+            });
+            currentRank++;
+            updateRankingDisplay();
         }
-
-        // Add to ranking order
-        rankingOrder.push(container.dataset.imageId - 1);
-        updateRankingDisplay();
-    }
-
-    // Reset selection
-    resetBtn.addEventListener('click', () => {
-        loadImages();
-    });
-
-    // Handle form submission
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (selectedImages.length === 7) {
-                // Save the current page's ranking to localStorage
-                localStorage.setItem('ranking_page_1', JSON.stringify({
-                    timestamp: new Date().toISOString(),
-                    ranking: rankingOrder.map(index => ({
-                        rank: rankingOrder.indexOf(index) + 1,
-                        image: generatedImageSources[index]
-                    }))
-                }));
-                
-                // Navigate to next page
-                window.location.replace('page2.html');
-            }
-        });
     }
 
     // Function to update the ranking display
@@ -195,6 +154,11 @@ document.addEventListener('DOMContentLoaded', function() {
             rankingList.appendChild(item);
         });
     }
+
+    // Reset button functionality
+    resetBtn.addEventListener('click', function() {
+        loadImages();
+    });
 
     // Load images when the page loads
     loadImages();
