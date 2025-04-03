@@ -1,4 +1,11 @@
-﻿document.addEventListener('DOMContentLoaded', function() {
+# Function to generate JavaScript file
+function Update-JavaScript {
+    param (
+        [int]$pageNumber
+    )
+    
+    $js = @"
+document.addEventListener('DOMContentLoaded', function() {
     const imageGrid = document.getElementById('imageGrid');
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
@@ -11,13 +18,13 @@
 
     // Array of generated image sources
     const generatedImageSources = [
-        'images/image6/gen1.png',
-        'images/image6/gen2.png',
-        'images/image6/gen3.png',
-        'images/image6/gen4.png',
-        'images/image6/gen5.png',
-        'images/image6/gen6.png',
-        'images/image6/gen7.png'
+        'images/image$pageNumber/gen1.png',
+        'images/image$pageNumber/gen2.png',
+        'images/image$pageNumber/gen3.png',
+        'images/image$pageNumber/gen4.png',
+        'images/image$pageNumber/gen5.png',
+        'images/image$pageNumber/gen6.png',
+        'images/image$pageNumber/gen7.png'
     ];
 
     // Function to create image comparison container
@@ -62,7 +69,7 @@
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
+            generatedImg.style.setProperty('--clip-position', `\${this.value}%`);
         });
 
         wrapper.appendChild(referenceImg);
@@ -86,7 +93,7 @@
 
         // Add the 7 generated images with comparison sliders
         generatedImageSources.forEach((generatedImageSrc, index) => {
-            const referenceImageSrc = 'images/image6/ref.png';
+            const referenceImageSrc = 'images/image$pageNumber/ref.png';
             
             const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
 
@@ -142,7 +149,7 @@
             img.setAttribute('role', 'presentation');
             
             const rankText = document.createElement('span');
-            rankText.textContent = `Rank ${rank + 1}`;
+            rankText.textContent = `Rank \${rank + 1}`;
             
             item.appendChild(img);
             item.appendChild(rankText);
@@ -169,7 +176,7 @@
             
             if (nextPage) {
                 // Save the current page's ranking to localStorage
-                localStorage.setItem('ranking_page_6', JSON.stringify({
+                localStorage.setItem('ranking_page_$pageNumber', JSON.stringify({
                     timestamp: new Date().toISOString(),
                     ranking: rankingOrder.map(index => ({
                         rank: rankingOrder.indexOf(index) + 1,
@@ -187,7 +194,7 @@
     loadImages();
 
     // Check if there's saved ranking for this page and restore if exists
-    const savedRanking = localStorage.getItem('ranking_page_6');
+    const savedRanking = localStorage.getItem('ranking_page_$pageNumber');
     if (savedRanking) {
         try {
             const data = JSON.parse(savedRanking);
@@ -207,3 +214,15 @@
         }
     }
 });
+"@
+
+    $js | Out-File -FilePath "script$pageNumber.js" -Encoding UTF8
+    Write-Host "Updated script$pageNumber.js"
+}
+
+# Update scripts 7-15
+for ($i = 7; $i -le 15; $i++) {
+    Update-JavaScript -pageNumber $i
+}
+
+Write-Host "Updated all remaining scripts successfully!" 
