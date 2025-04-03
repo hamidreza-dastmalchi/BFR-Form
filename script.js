@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
         generatedImg.className = 'generated-image';
         generatedImg.src = generatedImageSrc;
         generatedImg.alt = '';
+        generatedImg.setAttribute('aria-hidden', 'true');
+        generatedImg.setAttribute('role', 'presentation');
         generatedImg.style.setProperty('--clip-position', '100%');
 
         // Reference image (underneath)
@@ -42,6 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
         referenceImg.className = 'reference-compare-image';
         referenceImg.src = referenceImageSrc;
         referenceImg.alt = '';
+        referenceImg.setAttribute('aria-hidden', 'true');
+        referenceImg.setAttribute('role', 'presentation');
 
         // Slider container
         const sliderContainer = document.createElement('div');
