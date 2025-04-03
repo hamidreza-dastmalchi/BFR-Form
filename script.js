@@ -115,22 +115,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle image click
     function handleImageClick(container) {
-        if (container.classList.contains('selected')) return;
-
-        container.classList.add('selected');
-        container.dataset.rank = currentRank;
-        
         const imageId = container.getAttribute('data-image-id');
-        if (!rankingOrder.includes(imageId)) {
-            rankingOrder.push(imageId);
-            selectedImages.push({
-                imageId: imageId,
-                imageName: imageNames[parseInt(imageId)],
-                rank: currentRank
-            });
-            currentRank++;
-            updateRankingDisplay();
+        
+        // If image is already selected, deselect it
+        if (container.classList.contains('selected')) {
+            // Remove from selected state
+            container.classList.remove('selected');
+            container.removeAttribute('data-rank');
+            
+            // Remove from rankings
+            const index = rankingOrder.indexOf(imageId);
+            if (index > -1) {
+                rankingOrder.splice(index, 1);
+                selectedImages = selectedImages.filter(img => img.imageId !== imageId);
+                
+                // Update ranks for remaining images
+                selectedImages.forEach((img, i) => {
+                    img.rank = i + 1;
+                    const imgContainer = document.querySelector(`[data-image-id="${img.imageId}"]`);
+                    if (imgContainer) {
+                        imgContainer.dataset.rank = i + 1;
+                    }
+                });
+                
+                currentRank = selectedImages.length + 1;
+            }
+        } else {
+            // Select the image
+            container.classList.add('selected');
+            container.dataset.rank = currentRank;
+            
+            if (!rankingOrder.includes(imageId)) {
+                rankingOrder.push(imageId);
+                selectedImages.push({
+                    imageId: imageId,
+                    imageName: imageNames[parseInt(imageId)],
+                    rank: currentRank
+                });
+                currentRank++;
+            }
         }
+        
+        // Update the display
+        updateRankingDisplay();
     }
 
     // Function to update the ranking display
