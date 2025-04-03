@@ -3,20 +3,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
     const submitBtn = document.getElementById('submitBtn');
-    const referenceImageSrc = 'images/image3/ref.png';
+    const referenceImageSrc = 'images/image10/ref.png';
     
     // Array to store the ranking order
     let rankingOrder = [];
     
     // Array of generated image sources
     const generatedImageSources = [
-        'images/image3/gen1.png',
-        'images/image3/gen2.png',
-        'images/image3/gen3.png',
-        'images/image3/gen4.png',
-        'images/image3/gen5.png',
-        'images/image3/gen6.png',
-        'images/image3/gen7.png'
+        'images/image10/gen1.png',
+        'images/image10/gen2.png',
+        'images/image10/gen3.png',
+        'images/image10/gen4.png',
+        'images/image10/gen5.png',
+        'images/image10/gen6.png',
+        'images/image10/gen7.png'
     ];
 
     // Create image containers with sliders
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.addEventListener('click', function() {
         if (rankingOrder.length === generatedImageSources.length) {
             const results = {
-                page: 3,
+                page: 10,
                 timestamp: new Date().toISOString(),
                 ranking: rankingOrder.map(index => ({
                     rank: rankingOrder.indexOf(index) + 1,

@@ -3,32 +3,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
     const submitBtn = document.getElementById('submitBtn');
-    const referenceImage = document.getElementById('reference');
-
-    let selectedImages = [];
-    let currentRank = 1;
-
-    // Set reference image
-    referenceImage.src = 'images/image2/ref.png';
-
-    // Array of image names
-    const imageNames = [
-        '1_IGCP-v1',
-        '2_VQFR',
-        '3_codeformer',
-        '4_DR2',
-        '5_GPEN',
-        '6_GFPGAN',
-        '7_PULSE'
+    const referenceImageSrc = 'images/image2/ref.png';
+    
+    // Array to store the ranking order
+    let rankingOrder = [];
+    
+    // Array of generated image sources
+    const generatedImageSources = [
+        'images/image2/gen1.png',
+        'images/image2/gen2.png',
+        'images/image2/gen3.png',
+        'images/image2/gen4.png',
+        'images/image2/gen5.png',
+        'images/image2/gen6.png',
+        'images/image2/gen7.png'
     ];
 
-    // Function to create image comparison container
-    function createImageComparison(generatedImageSrc, referenceImageSrc) {
-        const container = document.createElement('div');
-        container.className = 'image-container';
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = 'image-wrapper';
+    // Create image containers with sliders
+    generatedImageSources.forEach((generatedImageSrc, index) => {
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'image-container';
+        imageContainer.setAttribute('data-index', index);
+
+        // Image wrapper
+        const imageWrapper = document.createElement('div');
+        imageWrapper.className = 'image-wrapper';
 
         // Generated image (will be clipped)
         const generatedImg = document.createElement('img');
@@ -54,113 +53,82 @@ document.addEventListener('DOMContentLoaded', function() {
         // Slider input
         const slider = document.createElement('input');
         slider.type = 'range';
-        slider.className = 'comparison-slider';
         slider.min = '0';
         slider.max = '100';
         slider.value = '100';
-        slider.title = 'Move slider to compare images';
+        slider.className = 'slider';
 
-        // Update clip path when slider moves
+        // Add event listener for slider
         slider.addEventListener('input', function() {
             generatedImg.style.setProperty('--clip-position', `${this.value}%`);
         });
 
-        wrapper.appendChild(referenceImg);
-        wrapper.appendChild(generatedImg);
+        // Append elements
+        imageWrapper.appendChild(referenceImg);
+        imageWrapper.appendChild(generatedImg);
         sliderContainer.appendChild(slider);
-        container.appendChild(wrapper);
-        container.appendChild(sliderContainer);
+        imageContainer.appendChild(imageWrapper);
+        imageContainer.appendChild(sliderContainer);
+        imageGrid.appendChild(imageContainer);
 
-        return container;
-    }
+        // Add click event for ranking
+        imageContainer.addEventListener('click', function() {
+            const index = this.getAttribute('data-index');
+            if (!rankingOrder.includes(index)) {
+                rankingOrder.push(index);
+                updateRankingDisplay();
+                this.classList.add('selected');
+            }
+        });
+    });
 
-    // Function to load images
-    function loadImages() {
-        // Clear existing content
-        imageGrid.innerHTML = '';
+    // Function to update the ranking display
+    function updateRankingDisplay() {
         rankingList.innerHTML = '';
-        selectedImages = [];
-        currentRank = 1;
-        submitBtn.disabled = true;
-
-        // Add the 7 generated images with comparison sliders
-        imageNames.forEach((imageName, index) => {
-            const generatedImageSrc = `images/image2/${imageName}.jpg`;
-            const referenceImageSrc = 'images/image2/ref.png';
+        rankingOrder.forEach((index, rank) => {
+            const item = document.createElement('div');
+            item.className = 'rank-item';
             
-            const container = createImageComparison(generatedImageSrc, referenceImageSrc);
-            container.dataset.imageId = index + 1;
-
-            container.addEventListener('click', (e) => {
-                // Only handle click if not clicking on slider
-                if (!e.target.classList.contains('comparison-slider')) {
-                    handleImageClick(container);
-                }
-            });
-
-            imageGrid.appendChild(container);
+            const img = document.createElement('img');
+            img.src = generatedImageSources[index];
+            img.alt = '';
+            img.setAttribute('aria-hidden', 'true');
+            img.setAttribute('role', 'presentation');
+            
+            const rankText = document.createElement('span');
+            rankText.textContent = `Rank ${rank + 1}`;
+            
+            item.appendChild(img);
+            item.appendChild(rankText);
+            rankingList.appendChild(item);
         });
     }
 
-    // Handle image click
-    function handleImageClick(container) {
-        if (container.classList.contains('selected')) return;
-
-        container.classList.add('selected');
-        container.dataset.rank = currentRank;
-
-        // Add to ranking list
-        const rankItem = document.createElement('div');
-        rankItem.className = 'rank-item';
-        rankItem.innerHTML = `
-            <span>${currentRank}.</span>
-            <img src="${container.querySelector('.generated-image').src}" alt="">
-        `;
-        rankingList.appendChild(rankItem);
-
-        selectedImages.push({
-            imageId: container.dataset.imageId,
-            imageName: imageNames[parseInt(container.dataset.imageId) - 1],
-            rank: currentRank
+    // Reset button functionality
+    resetBtn.addEventListener('click', function() {
+        rankingOrder = [];
+        updateRankingDisplay();
+        document.querySelectorAll('.image-container').forEach(container => {
+            container.classList.remove('selected');
         });
+    });
 
-        currentRank++;
-
-        // Enable submit button when all images are ranked
-        if (selectedImages.length === 7) {
-            submitBtn.disabled = false;
+    // Submit button functionality
+    submitBtn.addEventListener('click', function() {
+        if (rankingOrder.length === generatedImageSources.length) {
+            const results = {
+                page: 2,
+                timestamp: new Date().toISOString(),
+                ranking: rankingOrder.map(index => ({
+                    rank: rankingOrder.indexOf(index) + 1,
+                    image: generatedImageSources[index]
+                }))
+            };
+            console.log('Ranking Results:', results);
+            // Here you can add code to send results to a server
+            alert('Ranking submitted successfully!');
+        } else {
+            alert('Please rank all images before submitting.');
         }
-    }
-
-    // Reset selection
-    resetBtn.addEventListener('click', () => {
-        loadImages();
     });
-
-    // Handle form submission
-    submitBtn.addEventListener('click', () => {
-        if (selectedImages.length !== 7) return;
-
-        // Create the ranking data
-        const rankingData = {
-            referenceImage: 'images/image2/ref.png',
-            rankings: selectedImages
-        };
-
-        // Here you would typically send the data to your server
-        console.log('Ranking submitted:', rankingData);
-        
-        // You can add your API call here to submit the data
-        // Example:
-        // fetch('/api/submit-ranking', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(rankingData)
-        // });
-    });
-
-    // Load images when the page loads
-    loadImages();
-}); 
+});
