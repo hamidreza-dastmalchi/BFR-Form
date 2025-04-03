@@ -9,6 +9,23 @@
     let selectedImages = [];
     let currentRank = 1;
     let rankingOrder = [];
+    let imagesLoaded = 0;
+    const totalImages = 8; // 7 generated + 1 reference
+
+    // Function to check if all images are loaded
+    function checkAllImagesLoaded() {
+        imagesLoaded++;
+        if (imagesLoaded === totalImages) {
+            console.log('All images loaded successfully');
+        }
+    }
+
+    // Function to handle image load error
+    function handleImageError(img, src) {
+        console.error(`Failed to load image: ${src}`);
+        img.onerror = null; // Prevent infinite loop
+        checkAllImagesLoaded(); // Still increment counter to not block the UI
+    }
 
     // Array of generated image sources
     const generatedImageSources = [
@@ -47,6 +64,8 @@
         generatedImg.setAttribute('aria-hidden', 'true');
         generatedImg.setAttribute('role', 'presentation');
         generatedImg.style.setProperty('--clip-position', '100%');
+        generatedImg.onload = checkAllImagesLoaded;
+        generatedImg.onerror = () => handleImageError(generatedImg, generatedImageSrc);
 
         // Reference image (underneath)
         const referenceImg = document.createElement('img');
@@ -55,6 +74,8 @@
         referenceImg.alt = '';
         referenceImg.setAttribute('aria-hidden', 'true');
         referenceImg.setAttribute('role', 'presentation');
+        referenceImg.onload = checkAllImagesLoaded;
+        referenceImg.onerror = () => handleImageError(referenceImg, referenceImageSrc);
 
         // Slider container
         const sliderContainer = document.createElement('div');
@@ -114,6 +135,8 @@
             img.alt = '';
             img.setAttribute('aria-hidden', 'true');
             img.setAttribute('role', 'presentation');
+            img.onload = checkAllImagesLoaded;
+            img.onerror = () => handleImageError(img, generatedImageSources[index]);
             
             const rankText = document.createElement('span');
             rankText.textContent = `Rank ${rank + 1}`;
@@ -137,28 +160,33 @@
         if (submitBtn) submitBtn.disabled = true;
     });
 
-    // Next button functionality
-    if (nextBtn) {
-        nextBtn.disabled = true; // Ensure button starts disabled
-        nextBtn.addEventListener('click', function(e) {
+    // Navigation button functionality
+    document.querySelectorAll('[data-next-page], [data-prev-page]').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
-            if (!checkAllImagesRanked()) {
+            const nextPage = this.getAttribute('data-next-page');
+            const prevPage = this.getAttribute('data-prev-page');
+            
+            if (nextPage && !checkAllImagesRanked()) {
                 alert('Please rank all images before proceeding.');
                 return;
             }
-            // Save the current page's ranking to localStorage
-            localStorage.setItem('ranking_page_2', JSON.stringify({
-                timestamp: new Date().toISOString(),
-                ranking: rankingOrder.map(index => ({
-                    rank: rankingOrder.indexOf(index) + 1,
-                    image: generatedImageSources[index]
-                }))
-            }));
             
-            // Navigate to next page
-            window.location.replace('page3.html');
+            if (nextPage) {
+                // Save the current page's ranking to localStorage
+                localStorage.setItem('ranking_page_2', JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    ranking: rankingOrder.map(index => ({
+                        rank: rankingOrder.indexOf(index) + 1,
+                        image: generatedImageSources[index]
+                    }))
+                }));
+                window.location.replace(nextPage);
+            } else if (prevPage) {
+                window.location.replace(prevPage);
+            }
         });
-    }
+    });
 
     // Submit button functionality (only on last page)
     if (submitBtn) {
@@ -211,5 +239,12 @@
             }
         });
         checkAllImagesRanked();
+    }
+
+    // Load the reference image
+    const referenceImg = document.getElementById('reference');
+    if (referenceImg) {
+        referenceImg.onload = checkAllImagesLoaded;
+        referenceImg.onerror = () => handleImageError(referenceImg, referenceImageSrc);
     }
 });
