@@ -3,10 +3,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
     const referenceImage = document.getElementById('reference');
+    const submitBtn = document.getElementById('submitBtn');  // Add submit button reference
 
     let selectedImages = [];
     let currentRank = 1;
     let rankingOrder = [];
+    let userId = generateUserId();  // Generate unique user ID
+
+    // Generate a unique user ID
+    function generateUserId() {
+        return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
 
     // Set reference image
     referenceImage.src = 'images/image1/ref.png';
@@ -160,6 +167,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // Enable submit button only when all images are ranked
+        if (submitBtn) {
+            submitBtn.disabled = rankingOrder.length !== generatedImageSources.length;
+        }
+        
         // Update the display
         updateRankingDisplay();
     }
@@ -190,6 +202,12 @@ document.addEventListener('DOMContentLoaded', function() {
     resetBtn.addEventListener('click', function() {
         loadImages();
     });
+
+    // Add submit button event listener
+    if (submitBtn) {
+        submitBtn.addEventListener('click', submitRankings);
+        submitBtn.disabled = true;  // Disabled by default until all images are ranked
+    }
 
     // Load images when the page loads
     loadImages();

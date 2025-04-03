@@ -3,45 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Ranking Form - Page 1</title>
+    <title>Image Comparison and Ranking</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Image Ranking Task - Page 1</h1>
+        <h1>Image Comparison and Ranking</h1>
+        
+        <div class="user-info">
+            <h2>Participant Information</h2>
+            <form id="userInfoForm">
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" required min="18" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="experience">Experience with image processing:</label>
+                    <select id="experience" name="experience" required>
+                        <option value="">Select experience level</option>
+                        <option value="none">None</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
         <div class="instructions">
-            <h2>Instructions:</h2>
-            <p>1. Look at the reference image below</p>
-            <p>2. For each generated image, use the slider below it to compare with the reference image:</p>
-            <ul>
-                <li>Move the slider left to reveal the reference image</li>
-                <li>Move the slider right to see the generated image</li>
-                <li>This helps you compare the differences directly</li>
-            </ul>
-            <p>3. Click on the generated images in order of similarity to the reference image</p>
-            <p>4. Click the most similar image first, then the second most similar, and so on</p>
-            <p>5. You can change your selection by clicking "Reset"</p>
+            <h2>Instructions</h2>
+            <p>1. Use the slider on each image to compare it with the reference image.</p>
+            <p>2. Click on the images to rank them from best (1) to worst (7).</p>
+            <p>3. You can click again on a ranked image to remove its ranking.</p>
+            <p>4. Submit your rankings when you have ranked all images.</p>
         </div>
 
         <div class="reference-image">
             <h2>Reference Image</h2>
-            <img id="reference" src="images/image1/ref.png" alt="" aria-hidden="true" role="presentation">
+            <img id="reference" alt="Reference image" src="">
         </div>
 
         <div class="generated-images">
             <h2>Generated Images</h2>
-            <div class="image-grid" id="imageGrid">
-                <!-- Images will be added here dynamically -->
-            </div>
+            <div id="imageGrid" class="image-grid"></div>
         </div>
 
         <div class="ranking-display">
-            <h2>Your Ranking:</h2>
+            <h2>Current Rankings</h2>
             <div id="rankingList"></div>
         </div>
 
         <div class="button-container">
-            <button id="resetBtn" class="reset-button">Reset Selection</button>
+            <button id="resetBtn" class="reset-button">Reset Rankings</button>
+            <button id="submitBtn" class="submit-button" disabled>Submit Rankings</button>
+        </div>
+
+        <div class="progress-indicator">
+            <p>Page 1 of 15</p>
+            <div class="navigation-buttons">
+                <button class="nav-button" disabled>Previous</button>
+                <button class="nav-button">Next</button>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
