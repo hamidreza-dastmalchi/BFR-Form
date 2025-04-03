@@ -70,10 +70,10 @@
 
         // Add event listener for slider
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', ${this.value}%);
+            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
         });
 
-        // Append elements
+        // Append elements in the correct order
         imageWrapper.appendChild(referenceImg);
         imageWrapper.appendChild(generatedImg);
         sliderContainer.appendChild(slider);
@@ -116,7 +116,7 @@
             img.setAttribute('role', 'presentation');
             
             const rankText = document.createElement('span');
-            rankText.textContent = Rank ;
+            rankText.textContent = `Rank ${rank + 1}`;
             
             item.appendChild(img);
             item.appendChild(rankText);
@@ -180,9 +180,9 @@
             // Collect all rankings
             const allRankings = {};
             for (let i = 1; i <= 15; i++) {
-                const pageRanking = localStorage.getItem(anking_page_);
+                const pageRanking = localStorage.getItem(`ranking_page_${i}`);
                 if (pageRanking) {
-                    allRankings[page_] = JSON.parse(pageRanking);
+                    allRankings[`page_${i}`] = JSON.parse(pageRanking);
                 }
             }
 
