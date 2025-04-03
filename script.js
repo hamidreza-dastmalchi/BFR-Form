@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
         generatedImg.alt = '';
         generatedImg.setAttribute('aria-hidden', 'true');
         generatedImg.setAttribute('role', 'presentation');
-        generatedImg.style.setProperty('--clip-position', '0%');
+        generatedImg.style.setProperty('--clip-position', '100%');  // Start with generated image hidden
 
         // Slider container
         const sliderContainer = document.createElement('div');
@@ -70,12 +70,12 @@ document.addEventListener('DOMContentLoaded', function() {
         slider.className = 'slider';
         slider.min = '0';
         slider.max = '100';
-        slider.value = '0';
+        slider.value = '100';  // Start with slider at right (showing reference)
         slider.title = 'Move slider to compare images';
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
+            generatedImg.style.setProperty('--clip-position', `${100 - this.value}%`);
         });
 
         wrapper.appendChild(referenceImg);  // Reference image first (bottom layer)
