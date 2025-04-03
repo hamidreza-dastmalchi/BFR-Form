@@ -229,13 +229,21 @@
             rank: rank + 1
         }));
         currentRank = selectedImages.length + 1;
+        
+        // First load the images
         loadImages();
-        updateRankingDisplay();
-        document.querySelectorAll('.image-container').forEach(container => {
-            if (rankingOrder.includes(container.getAttribute('data-index'))) {
+        
+        // Then restore the selections
+        rankingOrder.forEach((index, rank) => {
+            const container = document.querySelector(.image-container[data-image-id=""]);
+            if (container) {
                 container.classList.add('selected');
+                container.dataset.rank = rank + 1;
             }
         });
+        
+        // Finally update the display and check status
+        updateRankingDisplay();
         checkAllImagesRanked();
     } else {
         // Load images when the page loads
