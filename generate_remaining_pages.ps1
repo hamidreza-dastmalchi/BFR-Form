@@ -1,4 +1,61 @@
-﻿document.addEventListener('DOMContentLoaded', function() {
+# Function to generate HTML file
+function Generate-HTML {
+    param (
+        [int]$pageNumber,
+        [int]$prevPage,
+        [int]$nextPage
+    )
+    
+    $prevLink = if ($prevPage -gt 0) { "page$prevPage.html" } else { "index.html" }
+    $nextLink = if ($nextPage -le 15) { "page$nextPage.html" } else { "" }
+    
+    $html = @"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Ranking - Page $pageNumber</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Image Ranking - Page $pageNumber</h1>
+        
+        <!-- Reference Image -->
+        <div class="reference-image">
+            <img src="images/image$pageNumber/ref.png" alt="" id="reference" aria-hidden="true" role="presentation">
+        </div>
+
+        <!-- Image Grid for Comparison -->
+        <div class="content-wrapper">
+            <div id="imageGrid" class="image-grid"></div>
+            <div id="rankingList" class="ranking-list"></div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" data-prev-page="$prevLink">Previous</button>
+            <button id="resetBtn">Reset Rankings</button>
+            <button id="nextBtn" class="nav-btn" data-next-page="$nextLink" disabled>Next</button>
+        </div>
+    </div>
+    <script src="script$pageNumber.js"></script>
+</body>
+</html>
+"@
+
+    $html | Out-File -FilePath "page$pageNumber.html" -Encoding UTF8
+}
+
+# Function to generate JavaScript file
+function Generate-JavaScript {
+    param (
+        [int]$pageNumber
+    )
+    
+    $js = @"
+document.addEventListener('DOMContentLoaded', function() {
     const imageGrid = document.getElementById('imageGrid');
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
@@ -11,13 +68,13 @@
 
     // Array of generated image sources
     const generatedImageSources = [
-        'images/image8/gen1.png',
-        'images/image8/gen2.png',
-        'images/image8/gen3.png',
-        'images/image8/gen4.png',
-        'images/image8/gen5.png',
-        'images/image8/gen6.png',
-        'images/image8/gen7.png'
+        'images/image$pageNumber/gen1.png',
+        'images/image$pageNumber/gen2.png',
+        'images/image$pageNumber/gen3.png',
+        'images/image$pageNumber/gen4.png',
+        'images/image$pageNumber/gen5.png',
+        'images/image$pageNumber/gen6.png',
+        'images/image$pageNumber/gen7.png'
     ];
 
     // Function to create image comparison container
@@ -62,7 +119,7 @@
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', \%);
+            generatedImg.style.setProperty('--clip-position', `\${this.value}%`);
         });
 
         wrapper.appendChild(referenceImg);
@@ -86,7 +143,7 @@
 
         // Add the 7 generated images with comparison sliders
         generatedImageSources.forEach((generatedImageSrc, index) => {
-            const referenceImageSrc = 'images/image8/ref.png';
+            const referenceImageSrc = 'images/image$pageNumber/ref.png';
             
             const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
 
@@ -142,7 +199,7 @@
             img.setAttribute('role', 'presentation');
             
             const rankText = document.createElement('span');
-            rankText.textContent = Rank \;
+            rankText.textContent = `Rank \${rank + 1}`;
             
             item.appendChild(img);
             item.appendChild(rankText);
@@ -169,7 +226,7 @@
             
             if (nextPage) {
                 // Save the current page's ranking to localStorage
-                localStorage.setItem('ranking_page_8', JSON.stringify({
+                localStorage.setItem('ranking_page_$pageNumber', JSON.stringify({
                     timestamp: new Date().toISOString(),
                     ranking: rankingOrder.map(index => ({
                         rank: rankingOrder.indexOf(index) + 1,
@@ -187,7 +244,7 @@
     loadImages();
 
     // Check if there's saved ranking for this page and restore if exists
-    const savedRanking = localStorage.getItem('ranking_page_8');
+    const savedRanking = localStorage.getItem('ranking_page_$pageNumber');
     if (savedRanking) {
         try {
             const data = JSON.parse(savedRanking);
@@ -207,3 +264,16 @@
         }
     }
 });
+"@
+
+    $js | Out-File -FilePath "script$pageNumber.js" -Encoding UTF8
+}
+
+# Generate pages 5-15
+for ($i = 5; $i -le 15; $i++) {
+    Write-Host "Generating page $i..."
+    Generate-HTML -pageNumber $i -prevPage ($i - 1) -nextPage ($i + 1)
+    Generate-JavaScript -pageNumber $i
+}
+
+Write-Host "Generated all pages successfully!" 

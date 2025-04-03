@@ -3,7 +3,6 @@
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
     const nextBtn = document.getElementById('nextBtn');
-    const submitBtn = document.getElementById('submitBtn');
     const referenceImage = document.getElementById('reference');
 
     let selectedImages = [];
@@ -26,6 +25,7 @@
         const container = document.createElement('div');
         container.className = 'image-container';
         container.setAttribute('data-index', index);
+        container.setAttribute('data-image-id', index);
         
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
@@ -62,7 +62,7 @@
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', \%);
+            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
         });
 
         wrapper.appendChild(referenceImg);
@@ -83,14 +83,12 @@
         currentRank = 1;
         rankingOrder = [];
         if (nextBtn) nextBtn.disabled = true;
-        if (submitBtn) submitBtn.disabled = true;
 
         // Add the 7 generated images with comparison sliders
         generatedImageSources.forEach((generatedImageSrc, index) => {
             const referenceImageSrc = 'images/image4/ref.png';
             
             const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
-            container.dataset.imageId = index;
 
             container.addEventListener('click', (e) => {
                 // Only handle click if not clicking on slider
@@ -110,7 +108,7 @@
         container.classList.add('selected');
         container.dataset.rank = currentRank;
         
-        const imageId = container.dataset.imageId;
+        const imageId = container.getAttribute('data-image-id');
         if (!rankingOrder.includes(imageId)) {
             rankingOrder.push(imageId);
             selectedImages.push({
@@ -127,7 +125,6 @@
     function checkAllImagesRanked() {
         const allRanked = selectedImages.length === 7;
         if (nextBtn) nextBtn.disabled = !allRanked;
-        if (submitBtn) submitBtn.disabled = !allRanked;
         return allRanked;
     }
 
@@ -145,7 +142,7 @@
             img.setAttribute('role', 'presentation');
             
             const rankText = document.createElement('span');
-            rankText.textContent = Rank \;
+            rankText.textContent = `Rank ${rank + 1}`;
             
             item.appendChild(img);
             item.appendChild(rankText);
@@ -186,67 +183,27 @@
         });
     });
 
-    // Submit button functionality (only on last page)
-    if (submitBtn) {
-        submitBtn.addEventListener('click', function() {
-            if (!checkAllImagesRanked()) {
-                alert('Please rank all images before submitting.');
-                return;
-            }
-            // Save the last page's ranking
-            localStorage.setItem('ranking_page_4', JSON.stringify({
-                timestamp: new Date().toISOString(),
-                ranking: rankingOrder.map(index => ({
-                    rank: rankingOrder.indexOf(index) + 1,
-                    image: generatedImageSources[index]
-                }))
-            }));
+    // Load images when the page loads
+    loadImages();
 
-            // Collect all rankings
-            const allRankings = {};
-            for (let i = 1; i <= 15; i++) {
-                const pageRanking = localStorage.getItem(anking_page_\4);
-                if (pageRanking) {
-                    allRankings[page_\4] = JSON.parse(pageRanking);
-                }
-            }
-
-            console.log('All Rankings:', allRankings);
-            alert('All rankings submitted successfully!');
-        });
-    }
-
-    // Check if there's saved ranking for this page
+    // Check if there's saved ranking for this page and restore if exists
     const savedRanking = localStorage.getItem('ranking_page_4');
     if (savedRanking) {
-        const data = JSON.parse(savedRanking);
-        rankingOrder = data.ranking.map(r => {
-            const index = generatedImageSources.findIndex(src => src === r.image);
-            return index.toString();
-        });
-        selectedImages = rankingOrder.map((index, rank) => ({
-            imageId: index,
-            rank: rank + 1
-        }));
-        currentRank = selectedImages.length + 1;
-        
-        // First load the images
-        loadImages();
-        
-        // Then restore the selections
-        rankingOrder.forEach((index, rank) => {
-            const container = document.querySelector(.image-container[data-image-id=""]);
-            if (container) {
-                container.classList.add('selected');
-                container.dataset.rank = rank + 1;
-            }
-        });
-        
-        // Finally update the display and check status
-        updateRankingDisplay();
-        checkAllImagesRanked();
-    } else {
-        // Load images when the page loads
-        loadImages();
+        try {
+            const data = JSON.parse(savedRanking);
+            const containers = document.querySelectorAll('.image-container');
+            
+            data.ranking.forEach((item, index) => {
+                const imageIndex = generatedImageSources.findIndex(src => src === item.image);
+                if (imageIndex !== -1) {
+                    const container = containers[imageIndex];
+                    if (container) {
+                        handleImageClick(container);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error restoring rankings:', error);
+        }
     }
 });
