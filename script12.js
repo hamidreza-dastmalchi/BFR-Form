@@ -142,10 +142,8 @@
                     }))
                 }));
                 
-                // Navigate to next page - using direct link
-                window.location.href = 'page13.html';
-            } else {
-                alert('Please rank all images before proceeding to the next page.');
+                // Navigate to next page
+                window.location.replace('page13.html');
             }
         });
     }

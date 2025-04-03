@@ -155,27 +155,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle form submission
-    nextBtn.addEventListener('click', () => {
-        if (selectedImages.length !== 7) return;
-
-        // Create the ranking data
-        const rankingData = {
-            referenceImage: 'images/image1/ref.png',
-            rankings: selectedImages
-        };
-
-        // Save the current page's ranking to localStorage
-        localStorage.setItem('ranking_page_1', JSON.stringify({
-            timestamp: new Date().toISOString(),
-            ranking: rankingOrder.map(index => ({
-                rank: rankingOrder.indexOf(index) + 1,
-                image: generatedImageSources[index]
-            }))
-        }));
-        
-        // Navigate to next page - using direct link
-        window.location.href = 'page2.html';
-    });
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (selectedImages.length === 7) {
+                // Save the current page's ranking to localStorage
+                localStorage.setItem('ranking_page_1', JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    ranking: rankingOrder.map(index => ({
+                        rank: rankingOrder.indexOf(index) + 1,
+                        image: generatedImageSources[index]
+                    }))
+                }));
+                
+                // Navigate to next page
+                window.location.replace('page2.html');
+            }
+        });
+    }
 
     // Function to update the ranking display
     function updateRankingDisplay() {

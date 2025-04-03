@@ -229,10 +229,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     }))
                 }));
                 
-                // Navigate to next page - using direct link
-                window.location.href = 'page$($pageNumber + 1).html';
-            } else {
-                alert('Please rank all images before proceeding to the next page.');
+                // Navigate to next page
+                window.location.replace('page$($pageNumber + 1).html');
             }
         });
     }
