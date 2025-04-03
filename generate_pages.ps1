@@ -5,7 +5,12 @@ function Generate-HTML {
         [bool]$isLast
     )
     
-    $prevButton = "<button onclick=`"window.location.href='page$($pageNumber-1).html'`" class=`"nav-button`">Previous</button>"
+    $prevButton = if ($pageNumber -eq 2) {
+        "<button onclick=`"window.location.href='index.html'`" class=`"nav-button`">Previous</button>"
+    } else {
+        "<button onclick=`"window.location.href='page$($pageNumber-1).html'`" class=`"nav-button`">Previous</button>"
+    }
+    
     $nextButton = if (!$isLast) {
         "<button onclick=`"window.location.href='page$($pageNumber+1).html'`" class=`"nav-button`">Next</button>"
     } else { "" }
