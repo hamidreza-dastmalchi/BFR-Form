@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentRank = 1;
 
     // Set reference image
-    referenceImage.src = 'images/image2/ref.jpg';
+    referenceImage.src = 'images/image2/ref.png';
 
-    // Array of image names for the second set
+    // Array of image names
     const imageNames = [
         '1_IGCP-v1',
         '2_VQFR',
@@ -22,6 +22,53 @@ document.addEventListener('DOMContentLoaded', function() {
         '7_PULSE'
     ];
 
+    // Function to create image comparison container
+    function createImageComparison(generatedImageSrc, referenceImageSrc) {
+        const container = document.createElement('div');
+        container.className = 'image-container';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-wrapper';
+
+        // Generated image (will be clipped)
+        const generatedImg = document.createElement('img');
+        generatedImg.className = 'generated-image';
+        generatedImg.src = generatedImageSrc;
+        generatedImg.alt = 'Generated Image';
+        generatedImg.style.setProperty('--clip-position', '100%');
+
+        // Reference image (underneath)
+        const referenceImg = document.createElement('img');
+        referenceImg.className = 'reference-compare-image';
+        referenceImg.src = referenceImageSrc;
+        referenceImg.alt = 'Reference Image';
+
+        // Slider container
+        const sliderContainer = document.createElement('div');
+        sliderContainer.className = 'slider-container';
+
+        // Slider input
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'comparison-slider';
+        slider.min = '0';
+        slider.max = '100';
+        slider.value = '100';
+
+        // Update clip path when slider moves
+        slider.addEventListener('input', function() {
+            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
+        });
+
+        wrapper.appendChild(referenceImg);
+        wrapper.appendChild(generatedImg);
+        sliderContainer.appendChild(slider);
+        container.appendChild(wrapper);
+        container.appendChild(sliderContainer);
+
+        return container;
+    }
+
     // Function to load images
     function loadImages() {
         // Clear existing content
@@ -31,20 +78,22 @@ document.addEventListener('DOMContentLoaded', function() {
         currentRank = 1;
         submitBtn.disabled = true;
 
-        // Add the 7 generated images
+        // Add the 7 generated images with comparison sliders
         imageNames.forEach((imageName, index) => {
-            const imageContainer = document.createElement('div');
-            imageContainer.className = 'image-container';
-            imageContainer.dataset.imageId = index + 1;
+            const generatedImageSrc = `images/image2/${imageName}.jpg`;
+            const referenceImageSrc = 'images/image2/ref.png';
+            
+            const container = createImageComparison(generatedImageSrc, referenceImageSrc);
+            container.dataset.imageId = index + 1;
 
-            const img = document.createElement('img');
-            img.src = `images/image2/${imageName}.jpg`; // Using image2 folder for second set
-            img.alt = `Generated Image ${index + 1}`;
+            container.addEventListener('click', (e) => {
+                // Only handle click if not clicking on slider
+                if (!e.target.classList.contains('comparison-slider')) {
+                    handleImageClick(container);
+                }
+            });
 
-            imageContainer.appendChild(img);
-            imageGrid.appendChild(imageContainer);
-
-            imageContainer.addEventListener('click', () => handleImageClick(imageContainer));
+            imageGrid.appendChild(container);
         });
     }
 
@@ -60,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rankItem.className = 'rank-item';
         rankItem.innerHTML = `
             <span>${currentRank}.</span>
-            <img src="${container.querySelector('img').src}" alt="Ranked Image ${currentRank}">
+            <img src="${container.querySelector('.generated-image').src}" alt="Ranked Image ${currentRank}">
         `;
         rankingList.appendChild(rankItem);
 
@@ -89,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Create the ranking data
         const rankingData = {
-            referenceImage: 'images/image2/ref.jpg',
+            referenceImage: 'images/image2/ref.png',
             rankings: selectedImages
         };
 
