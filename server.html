@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Local Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        .instructions {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .file-list {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .file-list a {
+            display: block;
+            padding: 5px 0;
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .file-list a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Local File Server</h1>
+    
+    <div class="instructions">
+        <h2>Instructions:</h2>
+        <p>This is a simple file server for testing your application. Click on the links below to navigate to different pages.</p>
+        <p><strong>Important:</strong> For the navigation to work properly, you need to access this page through a web server, not directly from the file system.</p>
+    </div>
+    
+    <div class="file-list">
+        <h2>Available Files:</h2>
+        <a href="index.html">index.html (Page 1)</a>
+        <a href="page2.html">page2.html</a>
+        <a href="page3.html">page3.html</a>
+        <a href="page4.html">page4.html</a>
+        <a href="page5.html">page5.html</a>
+        <a href="page6.html">page6.html</a>
+        <a href="page7.html">page7.html</a>
+        <a href="page8.html">page8.html</a>
+        <a href="page9.html">page9.html</a>
+        <a href="page10.html">page10.html</a>
+        <a href="page11.html">page11.html</a>
+        <a href="page12.html">page12.html</a>
+        <a href="page13.html">page13.html</a>
+        <a href="page14.html">page14.html</a>
+        <a href="page15.html">page15.html</a>
+    </div>
+    
+    <script>
+        // This script will help you serve the files locally
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we're running from file:// protocol
+            if (window.location.protocol === 'file:') {
+                alert('Warning: You are accessing this page directly from the file system. For proper navigation, please use a web server.');
+            }
+        });
+    </script>
+</body>
+</html> 

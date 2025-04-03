@@ -173,11 +173,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }))
         }));
         
-        // Navigate to next page
-        const nextPage = nextBtn.getAttribute('data-next-page');
-        if (nextPage) {
-            window.location.href = nextPage;
-        }
+        // Navigate to next page - using direct link
+        window.location.href = 'page2.html';
     });
 
     // Function to update the ranking display
