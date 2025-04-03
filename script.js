@@ -103,8 +103,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
 
             container.addEventListener('click', (e) => {
-                // Only handle click if not clicking on slider
-                if (!e.target.classList.contains('slider')) {
+                // Only handle click if not clicking on slider or slider container
+                if (!e.target.classList.contains('slider') && !e.target.classList.contains('slider-container')) {
                     handleImageClick(container);
                 }
             });
@@ -123,22 +123,26 @@ document.addEventListener('DOMContentLoaded', function() {
             container.classList.remove('selected');
             container.removeAttribute('data-rank');
             
-            // Remove from rankings
+            // Find and remove from rankings
             const index = rankingOrder.indexOf(imageId);
             if (index > -1) {
+                // Remove from rankingOrder and selectedImages
                 rankingOrder.splice(index, 1);
                 selectedImages = selectedImages.filter(img => img.imageId !== imageId);
                 
-                // Update ranks for remaining images
-                selectedImages.forEach((img, i) => {
-                    img.rank = i + 1;
-                    const imgContainer = document.querySelector(`[data-image-id="${img.imageId}"]`);
-                    if (imgContainer) {
-                        imgContainer.dataset.rank = i + 1;
+                // Reset all ranks
+                const allSelected = document.querySelectorAll('.image-container.selected');
+                allSelected.forEach(el => el.removeAttribute('data-rank'));
+                
+                // Reassign ranks based on rankingOrder
+                rankingOrder.forEach((id, idx) => {
+                    const el = document.querySelector(`[data-image-id="${id}"]`);
+                    if (el) {
+                        el.dataset.rank = idx + 1;
                     }
                 });
                 
-                currentRank = selectedImages.length + 1;
+                currentRank = rankingOrder.length + 1;
             }
         } else {
             // Select the image
