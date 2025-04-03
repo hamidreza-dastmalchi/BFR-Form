@@ -164,18 +164,20 @@ document.addEventListener('DOMContentLoaded', function() {
             rankings: selectedImages
         };
 
-        // Here you would typically send the data to your server
-        console.log('Ranking submitted:', rankingData);
+        // Save the current page's ranking to localStorage
+        localStorage.setItem('ranking_page_1', JSON.stringify({
+            timestamp: new Date().toISOString(),
+            ranking: rankingOrder.map(index => ({
+                rank: rankingOrder.indexOf(index) + 1,
+                image: generatedImageSources[index]
+            }))
+        }));
         
-        // You can add your API call here to submit the data
-        // Example:
-        // fetch('/api/submit-ranking', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(rankingData)
-        // });
+        // Navigate to next page
+        const nextPage = nextBtn.getAttribute('data-next-page');
+        if (nextPage) {
+            window.location.href = nextPage;
+        }
     });
 
     // Function to update the ranking display
