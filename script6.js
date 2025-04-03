@@ -81,7 +81,10 @@
         imageGrid.appendChild(imageContainer);
 
         // Add click event for ranking
-        imageContainer.addEventListener('click', function() {
+        imageContainer.addEventListener('click', function(e) {
+            // Ignore clicks on the slider
+            if (e.target.classList.contains('slider')) return;
+            
             const index = this.getAttribute('data-index');
             if (!rankingOrder.includes(index)) {
                 rankingOrder.push(index);
@@ -171,9 +174,6 @@
 
                 console.log('All Rankings:', allRankings);
                 alert('All rankings submitted successfully!');
-                
-                // Optional: Clear localStorage after submission
-                // localStorage.clear();
             } else {
                 alert('Please rank all images before submitting.');
             }
