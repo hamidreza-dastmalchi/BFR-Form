@@ -30,6 +30,14 @@
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
 
+        // Reference image (underneath)
+        const referenceImg = document.createElement('img');
+        referenceImg.className = 'reference-compare-image';
+        referenceImg.src = referenceImageSrc;
+        referenceImg.alt = '';
+        referenceImg.setAttribute('aria-hidden', 'true');
+        referenceImg.setAttribute('role', 'presentation');
+
         // Generated image (will be clipped)
         const generatedImg = document.createElement('img');
         generatedImg.className = 'generated-image';
@@ -38,14 +46,6 @@
         generatedImg.setAttribute('aria-hidden', 'true');
         generatedImg.setAttribute('role', 'presentation');
         generatedImg.style.setProperty('--clip-position', '100%');
-
-        // Reference image (underneath)
-        const referenceImg = document.createElement('img');
-        referenceImg.className = 'reference-compare-image';
-        referenceImg.src = referenceImageSrc;
-        referenceImg.alt = '';
-        referenceImg.setAttribute('aria-hidden', 'true');
-        referenceImg.setAttribute('role', 'presentation');
 
         // Slider container
         const sliderContainer = document.createElement('div');
@@ -86,9 +86,11 @@
 
         // Add the 7 generated images with comparison sliders
         generatedImageSources.forEach((generatedImageSrc, index) => {
-            const referenceImageSrc = 'images/image10/ref.png';
-            
-            const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
+            const container = createImageComparison(
+                generatedImageSrc,
+                'images/image10/ref.png',
+                index
+            );
 
             container.addEventListener('click', (e) => {
                 // Only handle click if not clicking on slider
