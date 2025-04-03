@@ -34,14 +34,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const generatedImg = document.createElement('img');
         generatedImg.className = 'generated-image';
         generatedImg.src = generatedImageSrc;
-        generatedImg.alt = 'Generated Image';
+        generatedImg.alt = '';
         generatedImg.style.setProperty('--clip-position', '100%');
 
         // Reference image (underneath)
         const referenceImg = document.createElement('img');
         referenceImg.className = 'reference-compare-image';
         referenceImg.src = referenceImageSrc;
-        referenceImg.alt = 'Reference Image';
+        referenceImg.alt = '';
 
         // Slider container
         const sliderContainer = document.createElement('div');
