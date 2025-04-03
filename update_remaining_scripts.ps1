@@ -220,8 +220,8 @@ document.addEventListener('DOMContentLoaded', function() {
     Write-Host "Updated script$pageNumber.js"
 }
 
-# Update scripts 7-15
-for ($i = 7; $i -le 15; $i++) {
+# Update scripts 5-15
+for ($i = 5; $i -le 15; $i++) {
     Update-JavaScript -pageNumber $i
 }
 
