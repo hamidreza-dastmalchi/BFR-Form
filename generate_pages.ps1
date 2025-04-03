@@ -12,7 +12,7 @@ function Generate-HTML {
     }
     
     $nextButton = if (!$isLast) {
-        "<button id=`"nextBtn`" onclick=`"window.location.href='page$($pageNumber+1).html'`" class=`"nav-button`" disabled>Next</button>"
+        "<button id=`"nextBtn`" data-next-page=`"page$($pageNumber+1).html`" class=`"nav-button`" disabled>Next</button>"
     } else { "" }
 
     $submitButton = if ($isLast) {
@@ -212,25 +212,76 @@ document.addEventListener('DOMContentLoaded', function() {
         if (submitBtn) submitBtn.disabled = true;
     });
 
-    // Submit button functionality (only on last page)
-    if (submitBtn) {
-        submitBtn.addEventListener('click', function() {
+    // Next button functionality
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             if (rankingOrder.length === generatedImageSources.length) {
-                const results = {
-                    page: $pageNumber,
+                // Save the current page's ranking to localStorage
+                localStorage.setItem('ranking_page_$pageNumber', JSON.stringify({
                     timestamp: new Date().toISOString(),
                     ranking: rankingOrder.map(index => ({
                         rank: rankingOrder.indexOf(index) + 1,
                         image: generatedImageSources[index]
                     }))
-                };
-                console.log('Ranking Results:', results);
-                // Here you can add code to send results to a server
-                alert('Ranking submitted successfully!');
+                }));
+                
+                // Navigate to next page
+                window.location.href = this.getAttribute('data-next-page');
+            } else {
+                alert('Please rank all images before proceeding to the next page.');
+            }
+        });
+    }
+
+    // Submit button functionality (only on last page)
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+            if (rankingOrder.length === generatedImageSources.length) {
+                // Save the last page's ranking
+                localStorage.setItem('ranking_page_$pageNumber', JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    ranking: rankingOrder.map(index => ({
+                        rank: rankingOrder.indexOf(index) + 1,
+                        image: generatedImageSources[index]
+                    }))
+                }));
+
+                // Collect all rankings
+                const allRankings = {};
+                for (let i = 1; i <= 15; i++) {
+                    const pageRanking = localStorage.getItem(`ranking_page_${i}`);
+                    if (pageRanking) {
+                        allRankings[`page_${i}`] = JSON.parse(pageRanking);
+                    }
+                }
+
+                console.log('All Rankings:', allRankings);
+                alert('All rankings submitted successfully!');
+                
+                // Optional: Clear localStorage after submission
+                // localStorage.clear();
             } else {
                 alert('Please rank all images before submitting.');
             }
         });
+    }
+
+    // Check if there's saved ranking for this page
+    const savedRanking = localStorage.getItem('ranking_page_$pageNumber');
+    if (savedRanking) {
+        const data = JSON.parse(savedRanking);
+        rankingOrder = data.ranking.map(r => {
+            const index = generatedImageSources.findIndex(src => src === r.image);
+            return index.toString();
+        });
+        updateRankingDisplay();
+        document.querySelectorAll('.image-container').forEach(container => {
+            if (rankingOrder.includes(container.getAttribute('data-index'))) {
+                container.classList.add('selected');
+            }
+        });
+        checkAllImagesRanked();
     }
 });
 "@
