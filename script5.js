@@ -6,9 +6,10 @@
     const submitBtn = document.getElementById('submitBtn');
     const referenceImageSrc = 'images/image5/ref.png';
     
-    // Array to store the ranking order
+    let selectedImages = [];
+    let currentRank = 1;
     let rankingOrder = [];
-    
+
     // Array of generated image sources
     const generatedImageSources = [
         'images/image5/gen1.png',
@@ -90,7 +91,18 @@
                 rankingOrder.push(index);
                 updateRankingDisplay();
                 this.classList.add('selected');
-                checkAllImagesRanked();
+                
+                selectedImages.push({
+                    imageId: index,
+                    rank: rankingOrder.length
+                });
+                currentRank++;
+
+                // Check if all images are ranked
+                if (selectedImages.length === 7) {
+                    if (nextBtn) nextBtn.disabled = false;
+                    if (submitBtn) submitBtn.disabled = false;
+                }
             }
         });
     });
@@ -120,6 +132,8 @@
     // Reset button functionality
     resetBtn.addEventListener('click', function() {
         rankingOrder = [];
+        selectedImages = [];
+        currentRank = 1;
         updateRankingDisplay();
         document.querySelectorAll('.image-container').forEach(container => {
             container.classList.remove('selected');
@@ -132,7 +146,7 @@
     if (nextBtn) {
         nextBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (rankingOrder.length === generatedImageSources.length) {
+            if (selectedImages.length === 7) {
                 // Save the current page's ranking to localStorage
                 localStorage.setItem('ranking_page_5', JSON.stringify({
                     timestamp: new Date().toISOString(),
@@ -151,7 +165,7 @@
     // Submit button functionality (only on last page)
     if (submitBtn) {
         submitBtn.addEventListener('click', function() {
-            if (rankingOrder.length === generatedImageSources.length) {
+            if (selectedImages.length === 7) {
                 // Save the last page's ranking
                 localStorage.setItem('ranking_page_5', JSON.stringify({
                     timestamp: new Date().toISOString(),

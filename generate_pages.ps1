@@ -12,7 +12,7 @@ function Generate-HTML {
     }
     
     $nextButton = if (!$isLast) {
-        "<button id=`"nextBtn`" data-next-page=`"page$($pageNumber+1).html`" class=`"nav-button`" disabled>Next</button>"
+        "<button id=`"nextBtn`" class=`"nav-button`" disabled>Next</button>"
     } else { "" }
 
     $submitButton = if ($isLast) {
@@ -93,9 +93,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn');
     const referenceImageSrc = 'images/image$pageNumber/ref.png';
     
-    // Array to store the ranking order
+    let selectedImages = [];
+    let currentRank = 1;
     let rankingOrder = [];
-    
+
     // Array of generated image sources
     const generatedImageSources = [
         'images/image$pageNumber/gen1.png',
@@ -177,7 +178,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 rankingOrder.push(index);
                 updateRankingDisplay();
                 this.classList.add('selected');
-                checkAllImagesRanked();
+                
+                selectedImages.push({
+                    imageId: index,
+                    rank: rankingOrder.length
+                });
+                currentRank++;
+
+                // Check if all images are ranked
+                if (selectedImages.length === 7) {
+                    if (nextBtn) nextBtn.disabled = false;
+                    if (submitBtn) submitBtn.disabled = false;
+                }
             }
         });
     });
@@ -207,6 +219,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reset button functionality
     resetBtn.addEventListener('click', function() {
         rankingOrder = [];
+        selectedImages = [];
+        currentRank = 1;
         updateRankingDisplay();
         document.querySelectorAll('.image-container').forEach(container => {
             container.classList.remove('selected');
@@ -219,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (nextBtn) {
         nextBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (rankingOrder.length === generatedImageSources.length) {
+            if (selectedImages.length === 7) {
                 // Save the current page's ranking to localStorage
                 localStorage.setItem('ranking_page_$pageNumber', JSON.stringify({
                     timestamp: new Date().toISOString(),
@@ -238,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Submit button functionality (only on last page)
     if (submitBtn) {
         submitBtn.addEventListener('click', function() {
-            if (rankingOrder.length === generatedImageSources.length) {
+            if (selectedImages.length === 7) {
                 // Save the last page's ranking
                 localStorage.setItem('ranking_page_$pageNumber', JSON.stringify({
                     timestamp: new Date().toISOString(),
