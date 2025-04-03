@@ -21,10 +21,10 @@
     ];
 
     // Function to create image comparison container
-    function createImageComparison(generatedImageSrc, referenceImageSrc) {
+    function createImageComparison(generatedImageSrc, referenceImageSrc, index) {
         const container = document.createElement('div');
         container.className = 'image-container';
-        container.setAttribute('data-index', generatedImageSrc);
+        container.setAttribute('data-index', index);
         
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
@@ -87,7 +87,7 @@
         generatedImageSources.forEach((generatedImageSrc, index) => {
             const referenceImageSrc = 'images/image2/ref.png';
             
-            const container = createImageComparison(generatedImageSrc, referenceImageSrc);
+            const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
             container.dataset.imageId = index;
 
             container.addEventListener('click', (e) => {
@@ -176,9 +176,9 @@
                         image: generatedImageSources[index]
                     }))
                 }));
-                window.location.replace(nextPage);
+                window.location.href = nextPage;
             } else if (prevPage) {
-                window.location.replace(prevPage);
+                window.location.href = prevPage;
             }
         });
     });
