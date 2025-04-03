@@ -126,12 +126,12 @@ h2 {
     visibility: visible !important;
 }
 
-.generated-image {
+.reference-compare-image {
     clip-path: inset(0 var(--clip-position, 100%) 0 0);
     z-index: 2;
 }
 
-.reference-compare-image {
+.generated-image {
     z-index: 1;
 }
 

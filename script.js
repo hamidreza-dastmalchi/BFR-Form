@@ -43,22 +43,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
 
-        // Reference image (underneath)
-        const referenceImg = document.createElement('img');
-        referenceImg.className = 'reference-compare-image';
-        referenceImg.src = referenceImageSrc;
-        referenceImg.alt = '';
-        referenceImg.setAttribute('aria-hidden', 'true');
-        referenceImg.setAttribute('role', 'presentation');
-
-        // Generated image (on top)
+        // Generated image (underneath)
         const generatedImg = document.createElement('img');
         generatedImg.className = 'generated-image';
         generatedImg.src = generatedImageSrc;
         generatedImg.alt = '';
         generatedImg.setAttribute('aria-hidden', 'true');
         generatedImg.setAttribute('role', 'presentation');
-        generatedImg.style.setProperty('--clip-position', '100%');  // Start with generated image hidden
+
+        // Reference image (on top)
+        const referenceImg = document.createElement('img');
+        referenceImg.className = 'reference-compare-image';
+        referenceImg.src = referenceImageSrc;
+        referenceImg.alt = '';
+        referenceImg.setAttribute('aria-hidden', 'true');
+        referenceImg.setAttribute('role', 'presentation');
+        referenceImg.style.setProperty('--clip-position', '100%');  // Start with reference image hidden
 
         // Slider container
         const sliderContainer = document.createElement('div');
@@ -70,16 +70,16 @@ document.addEventListener('DOMContentLoaded', function() {
         slider.className = 'slider';
         slider.min = '0';
         slider.max = '100';
-        slider.value = '100';  // Start with slider at right (showing reference)
+        slider.value = '100';  // Start with slider at right (showing generated)
         slider.title = 'Move slider to compare images';
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', `${100 - this.value}%`);
+            referenceImg.style.setProperty('--clip-position', `${100 - this.value}%`);
         });
 
-        wrapper.appendChild(referenceImg);  // Reference image first (bottom layer)
-        wrapper.appendChild(generatedImg);  // Generated image second (top layer)
+        wrapper.appendChild(generatedImg);  // Generated image first (bottom layer)
+        wrapper.appendChild(referenceImg);  // Reference image second (top layer)
         sliderContainer.appendChild(slider);
         container.appendChild(wrapper);
         container.appendChild(sliderContainer);
