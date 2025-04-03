@@ -143,7 +143,10 @@
                 }));
                 
                 // Navigate to next page
-                window.location.href = this.getAttribute('data-next-page');
+                const nextPage = this.getAttribute('data-next-page');
+                if (nextPage) {
+                    window.location.href = nextPage;
+                }
             } else {
                 alert('Please rank all images before proceeding to the next page.');
             }
