@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
         slider.min = '0';
         slider.max = '100';
         slider.value = '100';
+        slider.title = 'Move slider to compare images';
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {

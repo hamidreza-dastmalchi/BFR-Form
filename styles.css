@@ -33,13 +33,29 @@ h2 {
 
 .instructions {
     background-color: #f8f9fa;
-    padding: 15px;
+    padding: 20px;
     border-radius: 5px;
     margin-bottom: 20px;
 }
 
+.instructions h2 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
 .instructions p {
+    margin: 10px 0;
+    color: #444;
+}
+
+.instructions ul {
+    margin: 10px 0 10px 20px;
+    color: #444;
+}
+
+.instructions li {
     margin: 5px 0;
+    line-height: 1.4;
 }
 
 .reference-image {
