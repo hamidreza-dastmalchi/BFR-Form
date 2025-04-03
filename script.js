@@ -24,13 +24,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Array of generated image sources
     const generatedImageSources = [
-        'images/image1/gen1.png',
-        'images/image1/gen2.png',
-        'images/image1/gen3.png',
-        'images/image1/gen4.png',
-        'images/image1/gen5.png',
-        'images/image1/gen6.png',
-        'images/image1/gen7.png'
+        'images/image1/1_IGCP-v1.png',
+        'images/image1/2_VQFR.jpg',
+        'images/image1/3_codeformer.png',
+        'images/image1/4_DR2.jpg',
+        'images/image1/5_GPEN.png',
+        'images/image1/6_GFPGAN.jpg',
+        'images/image1/7_PULSE.jpg'
     ];
 
     // Function to create image comparison container
