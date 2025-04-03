@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Ranking Form</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Image Ranking Task</h1>
+        <div class="instructions">
+            <h2>Instructions:</h2>
+            <p>1. Look at the reference image below</p>
+            <p>2. Click on the generated images in order of similarity to the reference image</p>
+            <p>3. Click the most similar image first, then the second most similar, and so on</p>
+            <p>4. You can change your selection by clicking "Reset"</p>
+        </div>
+
+        <div class="reference-image">
+            <h2>Reference Image</h2>
+            <img id="reference" src="images/image1/ref.jpg" alt="Reference Image">
+        </div>
+
+        <div class="generated-images">
+            <h2>Generated Images</h2>
+            <div class="image-grid" id="imageGrid">
+                <!-- Images will be added here dynamically -->
+            </div>
+        </div>
+
+        <div class="ranking-display">
+            <h2>Your Ranking:</h2>
+            <div id="rankingList"></div>
+        </div>
+
+        <button id="resetBtn" class="reset-button">Reset Selection</button>
+        <button id="submitBtn" class="submit-button">Submit Ranking</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
