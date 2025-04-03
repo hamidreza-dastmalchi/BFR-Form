@@ -23,7 +23,7 @@
 
     // Function to check if all images are ranked
     function checkAllImagesRanked() {
-        const allRanked = rankingOrder.length === generatedImageSources.length;
+        const allRanked = selectedImages.length === 7;
         if (nextBtn) nextBtn.disabled = !allRanked;
         if (submitBtn) submitBtn.disabled = !allRanked;
         return allRanked;
@@ -97,12 +97,7 @@
                     rank: rankingOrder.length
                 });
                 currentRank++;
-
-                // Check if all images are ranked
-                if (selectedImages.length === 7) {
-                    if (nextBtn) nextBtn.disabled = false;
-                    if (submitBtn) submitBtn.disabled = false;
-                }
+                checkAllImagesRanked();
             }
         });
     });
@@ -144,51 +139,55 @@
 
     // Next button functionality
     if (nextBtn) {
+        nextBtn.disabled = true; // Ensure button starts disabled
         nextBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (selectedImages.length === 7) {
-                // Save the current page's ranking to localStorage
-                localStorage.setItem('ranking_page_7', JSON.stringify({
-                    timestamp: new Date().toISOString(),
-                    ranking: rankingOrder.map(index => ({
-                        rank: rankingOrder.indexOf(index) + 1,
-                        image: generatedImageSources[index]
-                    }))
-                }));
-                
-                // Navigate to next page
-                window.location.replace('page8.html');
+            if (!checkAllImagesRanked()) {
+                alert('Please rank all images before proceeding.');
+                return;
             }
+            // Save the current page's ranking to localStorage
+            localStorage.setItem('ranking_page_7', JSON.stringify({
+                timestamp: new Date().toISOString(),
+                ranking: rankingOrder.map(index => ({
+                    rank: rankingOrder.indexOf(index) + 1,
+                    image: generatedImageSources[index]
+                }))
+            }));
+            
+            // Navigate to next page
+            window.location.replace('page8.html');
         });
     }
 
     // Submit button functionality (only on last page)
     if (submitBtn) {
+        submitBtn.disabled = true; // Ensure button starts disabled
         submitBtn.addEventListener('click', function() {
-            if (selectedImages.length === 7) {
-                // Save the last page's ranking
-                localStorage.setItem('ranking_page_7', JSON.stringify({
-                    timestamp: new Date().toISOString(),
-                    ranking: rankingOrder.map(index => ({
-                        rank: rankingOrder.indexOf(index) + 1,
-                        image: generatedImageSources[index]
-                    }))
-                }));
-
-                // Collect all rankings
-                const allRankings = {};
-                for (let i = 1; i <= 15; i++) {
-                    const pageRanking = localStorage.getItem(anking_page_);
-                    if (pageRanking) {
-                        allRankings[page_] = JSON.parse(pageRanking);
-                    }
-                }
-
-                console.log('All Rankings:', allRankings);
-                alert('All rankings submitted successfully!');
-            } else {
+            if (!checkAllImagesRanked()) {
                 alert('Please rank all images before submitting.');
+                return;
             }
+            // Save the last page's ranking
+            localStorage.setItem('ranking_page_7', JSON.stringify({
+                timestamp: new Date().toISOString(),
+                ranking: rankingOrder.map(index => ({
+                    rank: rankingOrder.indexOf(index) + 1,
+                    image: generatedImageSources[index]
+                }))
+            }));
+
+            // Collect all rankings
+            const allRankings = {};
+            for (let i = 1; i <= 15; i++) {
+                const pageRanking = localStorage.getItem(anking_page_);
+                if (pageRanking) {
+                    allRankings[page_] = JSON.parse(pageRanking);
+                }
+            }
+
+            console.log('All Rankings:', allRankings);
+            alert('All rankings submitted successfully!');
         });
     }
 
@@ -200,6 +199,11 @@
             const index = generatedImageSources.findIndex(src => src === r.image);
             return index.toString();
         });
+        selectedImages = rankingOrder.map((index, rank) => ({
+            imageId: index,
+            rank: rank + 1
+        }));
+        currentRank = selectedImages.length + 1;
         updateRankingDisplay();
         document.querySelectorAll('.image-container').forEach(container => {
             if (rankingOrder.includes(container.getAttribute('data-index'))) {
