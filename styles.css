@@ -61,6 +61,7 @@ h2 {
 .reference-image {
     text-align: center;
     margin-bottom: 30px;
+    position: relative;
 }
 
 .reference-image img {
@@ -68,8 +69,7 @@ h2 {
     max-height: 400px;
     border: 2px solid #ddd;
     border-radius: 5px;
-    font-size: 0;
-    color: transparent;
+    display: block;
 }
 
 .image-grid {
@@ -99,15 +99,15 @@ h2 {
 .image-wrapper img {
     font-size: 0 !important;
     color: transparent !important;
-    text-indent: -9999px;
-    user-select: none;
+    text-indent: -9999px !important;
+    user-select: none !important;
 }
 
 .image-container img {
     font-size: 0 !important;
     color: transparent !important;
-    text-indent: -9999px;
-    user-select: none;
+    text-indent: -9999px !important;
+    user-select: none !important;
 }
 
 .generated-image, .reference-compare-image {
@@ -119,8 +119,8 @@ h2 {
     object-fit: cover;
     font-size: 0 !important;
     color: transparent !important;
-    text-indent: -9999px;
-    user-select: none;
+    text-indent: -9999px !important;
+    user-select: none !important;
 }
 
 .generated-image {
@@ -270,4 +270,31 @@ button {
 
 .nav-button:hover {
     background-color: #0056b3;
+}
+
+img {
+    font-size: 0 !important;
+    color: transparent !important;
+    text-indent: -9999px !important;
+    user-select: none !important;
+}
+
+.reference-image img,
+.generated-image,
+.reference-compare-image,
+.rank-item img,
+.image-wrapper img,
+.image-container img {
+    font-size: 0 !important;
+    color: transparent !important;
+    text-indent: -9999px !important;
+    user-select: none !important;
+    pointer-events: none !important;
+}
+
+.image-wrapper::before,
+.image-wrapper::after,
+.image-container::before,
+.image-container::after {
+    display: none !important;
 } 
