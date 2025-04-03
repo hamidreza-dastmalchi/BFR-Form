@@ -43,15 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
 
-        // Generated image (will be clipped)
-        const generatedImg = document.createElement('img');
-        generatedImg.className = 'generated-image';
-        generatedImg.src = generatedImageSrc;
-        generatedImg.alt = '';
-        generatedImg.setAttribute('aria-hidden', 'true');
-        generatedImg.setAttribute('role', 'presentation');
-        generatedImg.style.setProperty('--clip-position', '100%');
-
         // Reference image (underneath)
         const referenceImg = document.createElement('img');
         referenceImg.className = 'reference-compare-image';
@@ -59,6 +50,15 @@ document.addEventListener('DOMContentLoaded', function() {
         referenceImg.alt = '';
         referenceImg.setAttribute('aria-hidden', 'true');
         referenceImg.setAttribute('role', 'presentation');
+
+        // Generated image (will be clipped)
+        const generatedImg = document.createElement('img');
+        generatedImg.className = 'generated-image';
+        generatedImg.src = generatedImageSrc;
+        generatedImg.alt = '';
+        generatedImg.setAttribute('aria-hidden', 'true');
+        generatedImg.setAttribute('role', 'presentation');
+        generatedImg.style.setProperty('--clip-position', '0%');
 
         // Slider container
         const sliderContainer = document.createElement('div');
@@ -70,16 +70,16 @@ document.addEventListener('DOMContentLoaded', function() {
         slider.className = 'slider';
         slider.min = '0';
         slider.max = '100';
-        slider.value = '100';
+        slider.value = '0';
         slider.title = 'Move slider to compare images';
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
+            generatedImg.style.setProperty('--clip-position', `${100 - this.value}%`);
         });
 
-        wrapper.appendChild(referenceImg);
         wrapper.appendChild(generatedImg);
+        wrapper.appendChild(referenceImg);
         sliderContainer.appendChild(slider);
         container.appendChild(wrapper);
         container.appendChild(sliderContainer);
