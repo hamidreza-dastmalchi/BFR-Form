@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rankItem.className = 'rank-item';
         rankItem.innerHTML = `
             <span>${currentRank}.</span>
-            <img src="${container.querySelector('.generated-image').src}" alt="Ranked Image ${currentRank}">
+            <img src="${container.querySelector('.generated-image').src}" alt="">
         `;
         rankingList.appendChild(rankItem);
 
