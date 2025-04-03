@@ -303,12 +303,25 @@ document.addEventListener('DOMContentLoaded', function() {
 "@
 }
 
-# Create image directories
+# Create image directories and copy images
 2..15 | ForEach-Object {
-    $dir = "images/image$_"
+    $pageNumber = $_
+    $dir = "images/image$pageNumber"
+    
+    # Create directory if it doesn't exist
     if (!(Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force
     }
+    
+    # Copy reference image and generated images from image1 directory
+    Copy-Item "images/image1/ref.png" "$dir/ref.png" -Force
+    Copy-Item "images/image1/1_IGCP-v1.png" "$dir/gen1.png" -Force
+    Copy-Item "images/image1/2_VQFR.jpg" "$dir/gen2.png" -Force
+    Copy-Item "images/image1/3_codeformer.png" "$dir/gen3.png" -Force
+    Copy-Item "images/image1/4_DR2.jpg" "$dir/gen4.png" -Force
+    Copy-Item "images/image1/5_GPEN.png" "$dir/gen5.png" -Force
+    Copy-Item "images/image1/6_GFPGAN.jpg" "$dir/gen6.png" -Force
+    Copy-Item "images/image1/7_PULSE.jpg" "$dir/gen7.png" -Force
 }
 
 # Generate pages 2 through 15
