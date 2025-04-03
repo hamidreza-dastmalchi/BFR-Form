@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         referenceImg.setAttribute('aria-hidden', 'true');
         referenceImg.setAttribute('role', 'presentation');
 
-        // Generated image (will be clipped)
+        // Generated image (on top)
         const generatedImg = document.createElement('img');
         generatedImg.className = 'generated-image';
         generatedImg.src = generatedImageSrc;
@@ -75,11 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', `${100 - this.value}%`);
+            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
         });
 
-        wrapper.appendChild(generatedImg);
-        wrapper.appendChild(referenceImg);
+        wrapper.appendChild(referenceImg);  // Reference image first (bottom layer)
+        wrapper.appendChild(generatedImg);  // Generated image second (top layer)
         sliderContainer.appendChild(slider);
         container.appendChild(wrapper);
         container.appendChild(sliderContainer);
