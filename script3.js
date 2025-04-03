@@ -25,6 +25,7 @@
         const container = document.createElement('div');
         container.className = 'image-container';
         container.setAttribute('data-index', index);
+        container.setAttribute('data-image-id', index);
         
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
@@ -88,7 +89,6 @@
             const referenceImageSrc = 'images/image3/ref.png';
             
             const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
-            container.dataset.imageId = index;
 
             container.addEventListener('click', (e) => {
                 // Only handle click if not clicking on slider
@@ -108,7 +108,7 @@
         container.classList.add('selected');
         container.dataset.rank = currentRank;
         
-        const imageId = container.dataset.imageId;
+        const imageId = container.getAttribute('data-image-id');
         if (!rankingOrder.includes(imageId)) {
             rankingOrder.push(imageId);
             selectedImages.push({
@@ -183,29 +183,27 @@
         });
     });
 
-    // Check if there's saved ranking for this page
+    // Load images when the page loads
+    loadImages();
+
+    // Check if there's saved ranking for this page and restore if exists
     const savedRanking = localStorage.getItem('ranking_page_3');
     if (savedRanking) {
-        const data = JSON.parse(savedRanking);
-        rankingOrder = data.ranking.map(r => {
-            const index = generatedImageSources.findIndex(src => src === r.image);
-            return index.toString();
-        });
-        selectedImages = rankingOrder.map((index, rank) => ({
-            imageId: index,
-            rank: rank + 1
-        }));
-        currentRank = selectedImages.length + 1;
-        loadImages();
-        updateRankingDisplay();
-        document.querySelectorAll('.image-container').forEach(container => {
-            if (rankingOrder.includes(container.getAttribute('data-index'))) {
-                container.classList.add('selected');
-            }
-        });
-        checkAllImagesRanked();
-    } else {
-        // Load images when the page loads
-        loadImages();
+        try {
+            const data = JSON.parse(savedRanking);
+            const containers = document.querySelectorAll('.image-container');
+            
+            data.ranking.forEach((item, index) => {
+                const imageIndex = generatedImageSources.findIndex(src => src === item.image);
+                if (imageIndex !== -1) {
+                    const container = containers[imageIndex];
+                    if (container) {
+                        handleImageClick(container);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error restoring rankings:', error);
+        }
     }
 });
