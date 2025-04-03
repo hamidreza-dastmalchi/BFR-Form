@@ -1,25 +1,15 @@
-# Function to generate HTML content
-function Generate-HTML {
+# Function to generate HTML file
+function Generate-HtmlFile {
     param (
         [int]$pageNumber,
-        [bool]$isLast
+        [int]$nextPageNumber
     )
     
-    $prevButton = if ($pageNumber -eq 2) {
-        "<button onclick=`"window.location.href='index.html'`" class=`"nav-button`">Previous</button>"
-    } else {
-        "<button onclick=`"window.location.href='page$($pageNumber-1).html'`" class=`"nav-button`">Previous</button>"
-    }
+    $prevPageNumber = $pageNumber - 1
+    $prevPage = if ($prevPageNumber -eq 1) { "index.html" } else { "page$prevPageNumber.html" }
+    $nextPage = if ($nextPageNumber -le 15) { "page$nextPageNumber.html" } else { "" }
     
-    $nextButton = if (!$isLast) {
-        "<button id=`"nextBtn`" class=`"nav-button`" disabled>Next</button>"
-    } else { "" }
-
-    $submitButton = if ($isLast) {
-        "<button id=`"submitBtn`" class=`"submit-button`" disabled>Submit Ranking</button>"
-    } else { "" }
-    
-    return @"
+    $htmlContent = @"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,10 +54,22 @@ function Generate-HTML {
 
         <div class="button-container">
             <button id="resetBtn" class="reset-button">Reset Selection</button>
-            $submitButton
+            
             <div class="navigation-buttons">
-                $prevButton
-                $nextButton
+                <button class="nav-button" data-prev-page="$prevPage">Previous</button>
+"@
+
+    if ($nextPage) {
+        $htmlContent += @"
+                <button id="nextBtn" class="nav-button" data-next-page="$nextPage" disabled>Next</button>
+"@
+    } else {
+        $htmlContent += @"
+                <button id="submitBtn" class="nav-button submit-button" disabled>Submit</button>
+"@
+    }
+
+    $htmlContent += @"
             </div>
         </div>
     </div>
@@ -75,24 +77,25 @@ function Generate-HTML {
 </body>
 </html>
 "@
+
+    $htmlContent | Out-File -FilePath "page$pageNumber.html" -Encoding UTF8
 }
 
-# Function to generate JavaScript content
-function Generate-JavaScript {
+# Function to generate JavaScript file
+function Generate-JsFile {
     param (
-        [int]$pageNumber,
-        [bool]$isLast = ($pageNumber -eq 15)
+        [int]$pageNumber
     )
     
-    return @"
+    $jsContent = @"
 document.addEventListener('DOMContentLoaded', function() {
     const imageGrid = document.getElementById('imageGrid');
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
     const nextBtn = document.getElementById('nextBtn');
     const submitBtn = document.getElementById('submitBtn');
-    const referenceImageSrc = 'images/image$pageNumber/ref.png';
-    
+    const referenceImage = document.getElementById('reference');
+
     let selectedImages = [];
     let currentRank = 1;
     let rankingOrder = [];
@@ -108,23 +111,14 @@ document.addEventListener('DOMContentLoaded', function() {
         'images/image$pageNumber/gen7.png'
     ];
 
-    // Function to check if all images are ranked
-    function checkAllImagesRanked() {
-        const allRanked = selectedImages.length === 7;
-        if (nextBtn) nextBtn.disabled = !allRanked;
-        if (submitBtn) submitBtn.disabled = !allRanked;
-        return allRanked;
-    }
-
-    // Create image containers with sliders
-    generatedImageSources.forEach((generatedImageSrc, index) => {
-        const imageContainer = document.createElement('div');
-        imageContainer.className = 'image-container';
-        imageContainer.setAttribute('data-index', index);
-
-        // Image wrapper
-        const imageWrapper = document.createElement('div');
-        imageWrapper.className = 'image-wrapper';
+    // Function to create image comparison container
+    function createImageComparison(generatedImageSrc, referenceImageSrc, index) {
+        const container = document.createElement('div');
+        container.className = 'image-container';
+        container.setAttribute('data-index', index);
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-wrapper';
 
         // Generated image (will be clipped)
         const generatedImg = document.createElement('img');
@@ -150,44 +144,82 @@ document.addEventListener('DOMContentLoaded', function() {
         // Slider input
         const slider = document.createElement('input');
         slider.type = 'range';
+        slider.className = 'slider';
         slider.min = '0';
         slider.max = '100';
         slider.value = '100';
-        slider.className = 'slider';
+        slider.title = 'Move slider to compare images';
 
-        // Add event listener for slider
+        // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
+            generatedImg.style.setProperty('--clip-position', `\${this.value}%`);
         });
 
-        // Append elements
-        imageWrapper.appendChild(referenceImg);
-        imageWrapper.appendChild(generatedImg);
+        wrapper.appendChild(referenceImg);
+        wrapper.appendChild(generatedImg);
         sliderContainer.appendChild(slider);
-        imageContainer.appendChild(imageWrapper);
-        imageContainer.appendChild(sliderContainer);
-        imageGrid.appendChild(imageContainer);
+        container.appendChild(wrapper);
+        container.appendChild(sliderContainer);
 
-        // Add click event for ranking
-        imageContainer.addEventListener('click', function(e) {
-            // Ignore clicks on the slider
-            if (e.target.classList.contains('slider')) return;
+        return container;
+    }
+
+    // Function to load images
+    function loadImages() {
+        // Clear existing content
+        imageGrid.innerHTML = '';
+        rankingList.innerHTML = '';
+        selectedImages = [];
+        currentRank = 1;
+        rankingOrder = [];
+        if (nextBtn) nextBtn.disabled = true;
+        if (submitBtn) submitBtn.disabled = true;
+
+        // Add the 7 generated images with comparison sliders
+        generatedImageSources.forEach((generatedImageSrc, index) => {
+            const referenceImageSrc = 'images/image$pageNumber/ref.png';
             
-            const index = this.getAttribute('data-index');
-            if (!rankingOrder.includes(index)) {
-                rankingOrder.push(index);
-                updateRankingDisplay();
-                this.classList.add('selected');
-                
-                selectedImages.push({
-                    imageId: index,
-                    rank: rankingOrder.length
-                });
-                currentRank++;
-                checkAllImagesRanked();
-            }
+            const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
+            container.dataset.imageId = index;
+
+            container.addEventListener('click', (e) => {
+                // Only handle click if not clicking on slider
+                if (!e.target.classList.contains('slider')) {
+                    handleImageClick(container);
+                }
+            });
+
+            imageGrid.appendChild(container);
         });
-    });
+    }
+
+    // Handle image click
+    function handleImageClick(container) {
+        if (container.classList.contains('selected')) return;
+
+        container.classList.add('selected');
+        container.dataset.rank = currentRank;
+        
+        const imageId = container.dataset.imageId;
+        if (!rankingOrder.includes(imageId)) {
+            rankingOrder.push(imageId);
+            selectedImages.push({
+                imageId: imageId,
+                rank: currentRank
+            });
+            currentRank++;
+            updateRankingDisplay();
+            checkAllImagesRanked();
+        }
+    }
+
+    // Function to check if all images are ranked
+    function checkAllImagesRanked() {
+        const allRanked = selectedImages.length === 7;
+        if (nextBtn) nextBtn.disabled = !allRanked;
+        if (submitBtn) submitBtn.disabled = !allRanked;
+        return allRanked;
+    }
 
     // Function to update the ranking display
     function updateRankingDisplay() {
@@ -203,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             img.setAttribute('role', 'presentation');
             
             const rankText = document.createElement('span');
-            rankText.textContent = `Rank ${rank + 1}`;
+            rankText.textContent = `Rank \${rank + 1}`;
             
             item.appendChild(img);
             item.appendChild(rankText);
@@ -213,43 +245,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Reset button functionality
     resetBtn.addEventListener('click', function() {
-        rankingOrder = [];
-        selectedImages = [];
-        currentRank = 1;
-        updateRankingDisplay();
-        document.querySelectorAll('.image-container').forEach(container => {
-            container.classList.remove('selected');
-        });
-        if (nextBtn) nextBtn.disabled = true;
-        if (submitBtn) submitBtn.disabled = true;
+        loadImages();
     });
 
-    // Next button functionality
-    if (nextBtn) {
-        nextBtn.disabled = true; // Ensure button starts disabled
-        nextBtn.addEventListener('click', function(e) {
+    // Navigation button functionality
+    document.querySelectorAll('[data-next-page], [data-prev-page]').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
-            if (!checkAllImagesRanked()) {
+            const nextPage = this.getAttribute('data-next-page');
+            const prevPage = this.getAttribute('data-prev-page');
+            
+            if (nextPage && !checkAllImagesRanked()) {
                 alert('Please rank all images before proceeding.');
                 return;
             }
-            // Save the current page's ranking to localStorage
-            localStorage.setItem('ranking_page_$pageNumber', JSON.stringify({
-                timestamp: new Date().toISOString(),
-                ranking: rankingOrder.map(index => ({
-                    rank: rankingOrder.indexOf(index) + 1,
-                    image: generatedImageSources[index]
-                }))
-            }));
             
-            // Navigate to next page
-            window.location.replace('page$($pageNumber + 1).html');
+            if (nextPage) {
+                // Save the current page's ranking to localStorage
+                localStorage.setItem('ranking_page_$pageNumber', JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    ranking: rankingOrder.map(index => ({
+                        rank: rankingOrder.indexOf(index) + 1,
+                        image: generatedImageSources[index]
+                    }))
+                }));
+                window.location.href = nextPage;
+            } else if (prevPage) {
+                window.location.href = prevPage;
+            }
         });
-    }
+    });
 
     // Submit button functionality (only on last page)
     if (submitBtn) {
-        submitBtn.disabled = true; // Ensure button starts disabled
         submitBtn.addEventListener('click', function() {
             if (!checkAllImagesRanked()) {
                 alert('Please rank all images before submitting.');
@@ -267,9 +295,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Collect all rankings
             const allRankings = {};
             for (let i = 1; i <= 15; i++) {
-                const pageRanking = localStorage.getItem(`ranking_page_${i}`);
+                const pageRanking = localStorage.getItem(`ranking_page_\${i}`);
                 if (pageRanking) {
-                    allRankings[`page_${i}`] = JSON.parse(pageRanking);
+                    allRankings[`page_\${i}`] = JSON.parse(pageRanking);
                 }
             }
 
@@ -291,6 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
             rank: rank + 1
         }));
         currentRank = selectedImages.length + 1;
+        loadImages();
         updateRankingDisplay();
         document.querySelectorAll('.image-container').forEach(container => {
             if (rankingOrder.includes(container.getAttribute('data-index'))) {
@@ -298,44 +327,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         checkAllImagesRanked();
+    } else {
+        // Load images when the page loads
+        loadImages();
     }
 });
 "@
+
+    $jsContent | Out-File -FilePath "script$pageNumber.js" -Encoding UTF8
 }
 
-# Create image directories and copy images
-2..15 | ForEach-Object {
-    $pageNumber = $_
-    $dir = "images/image$pageNumber"
-    
-    # Create directory if it doesn't exist
-    if (!(Test-Path $dir)) {
-        New-Item -ItemType Directory -Path $dir -Force
-    }
-    
-    # Copy reference image and generated images from image1 directory
-    Copy-Item "images/image1/ref.png" "$dir/ref.png" -Force
-    Copy-Item "images/image1/1_IGCP-v1.png" "$dir/gen1.png" -Force
-    Copy-Item "images/image1/2_VQFR.jpg" "$dir/gen2.png" -Force
-    Copy-Item "images/image1/3_codeformer.png" "$dir/gen3.png" -Force
-    Copy-Item "images/image1/4_DR2.jpg" "$dir/gen4.png" -Force
-    Copy-Item "images/image1/5_GPEN.png" "$dir/gen5.png" -Force
-    Copy-Item "images/image1/6_GFPGAN.jpg" "$dir/gen6.png" -Force
-    Copy-Item "images/image1/7_PULSE.jpg" "$dir/gen7.png" -Force
-}
-
-# Generate pages 2 through 15
-2..15 | ForEach-Object {
-    $pageNumber = $_
-    $isLast = $pageNumber -eq 15
-    
-    # Generate HTML
-    $html = Generate-HTML -pageNumber $pageNumber -isLast $isLast
-    $html | Out-File -FilePath "page$pageNumber.html" -Encoding UTF8
-    
-    # Generate JavaScript
-    $js = Generate-JavaScript -pageNumber $pageNumber -isLast $isLast
-    $js | Out-File -FilePath "script$pageNumber.js" -Encoding UTF8
+# Generate pages 4 through 15
+for ($i = 4; $i -le 15; $i++) {
+    Write-Host "Generating page $i..."
+    Generate-HtmlFile -pageNumber $i -nextPageNumber ($i + 1)
+    Generate-JsFile -pageNumber $i
 }
 
 Write-Host "Generated all pages successfully!" 
