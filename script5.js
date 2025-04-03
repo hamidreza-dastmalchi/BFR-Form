@@ -62,7 +62,7 @@
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', \%);
+            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
         });
 
         wrapper.appendChild(referenceImg);
@@ -142,7 +142,7 @@
             img.setAttribute('role', 'presentation');
             
             const rankText = document.createElement('span');
-            rankText.textContent = Rank \;
+            rankText.textContent = `Rank ${rank + 1}`;
             
             item.appendChild(img);
             item.appendChild(rankText);
