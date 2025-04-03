@@ -1,0 +1,213 @@
+const fs = require('fs');
+
+// Template for HTML pages
+function generateHTML(pageNumber, isFirst, isLast) {
+    const prevButton = !isFirst ? `<button onclick="window.location.href='${pageNumber === 2 ? 'index' : 'page' + (pageNumber-1)}.html'" class="nav-button">Previous</button>` : '';
+    const nextButton = !isLast ? `<button onclick="window.location.href='page${pageNumber+1}.html'" class="nav-button">Next</button>` : '';
+    
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Ranking Form - Page ${pageNumber}</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Image Ranking Task - Page ${pageNumber}</h1>
+        <div class="instructions">
+            <h2>Instructions:</h2>
+            <p>1. Look at the reference image below</p>
+            <p>2. For each generated image, use the slider below it to compare with the reference image:</p>
+            <ul>
+                <li>Move the slider left to reveal the reference image</li>
+                <li>Move the slider right to see the generated image</li>
+                <li>This helps you compare the differences directly</li>
+            </ul>
+            <p>3. Click on the generated images in order of similarity to the reference image</p>
+            <p>4. Click the most similar image first, then the second most similar, and so on</p>
+            <p>5. You can change your selection by clicking "Reset"</p>
+        </div>
+
+        <div class="reference-image">
+            <h2>Reference Image</h2>
+            <img id="reference" src="images/image${pageNumber}/ref.png" alt="" aria-hidden="true" role="presentation">
+        </div>
+
+        <div class="generated-images">
+            <h2>Generated Images</h2>
+            <div class="image-grid" id="imageGrid">
+                <!-- Images will be added here dynamically -->
+            </div>
+        </div>
+
+        <div class="ranking-display">
+            <h2>Your Ranking:</h2>
+            <div id="rankingList"></div>
+        </div>
+
+        <div class="button-container">
+            <button id="resetBtn" class="reset-button">Reset Selection</button>
+            <button id="submitBtn" class="submit-button">Submit Ranking</button>
+            <div class="navigation-buttons">
+                ${prevButton}
+                ${nextButton}
+            </div>
+        </div>
+    </div>
+    <script src="script${pageNumber}.js"></script>
+</body>
+</html>`;
+}
+
+// Template for JavaScript files
+function generateJS(pageNumber) {
+    return `document.addEventListener('DOMContentLoaded', function() {
+    const imageGrid = document.getElementById('imageGrid');
+    const rankingList = document.getElementById('rankingList');
+    const resetBtn = document.getElementById('resetBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const referenceImageSrc = 'images/image${pageNumber}/ref.png';
+    
+    // Array to store the ranking order
+    let rankingOrder = [];
+    
+    // Array of generated image sources
+    const generatedImageSources = [
+        'images/image${pageNumber}/gen1.png',
+        'images/image${pageNumber}/gen2.png',
+        'images/image${pageNumber}/gen3.png',
+        'images/image${pageNumber}/gen4.png',
+        'images/image${pageNumber}/gen5.png',
+        'images/image${pageNumber}/gen6.png',
+        'images/image${pageNumber}/gen7.png'
+    ];
+
+    // Create image containers with sliders
+    generatedImageSources.forEach((generatedImageSrc, index) => {
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'image-container';
+        imageContainer.setAttribute('data-index', index);
+
+        // Image wrapper
+        const imageWrapper = document.createElement('div');
+        imageWrapper.className = 'image-wrapper';
+
+        // Generated image (will be clipped)
+        const generatedImg = document.createElement('img');
+        generatedImg.className = 'generated-image';
+        generatedImg.src = generatedImageSrc;
+        generatedImg.alt = '';
+        generatedImg.setAttribute('aria-hidden', 'true');
+        generatedImg.setAttribute('role', 'presentation');
+        generatedImg.style.setProperty('--clip-position', '100%');
+
+        // Reference image (underneath)
+        const referenceImg = document.createElement('img');
+        referenceImg.className = 'reference-compare-image';
+        referenceImg.src = referenceImageSrc;
+        referenceImg.alt = '';
+        referenceImg.setAttribute('aria-hidden', 'true');
+        referenceImg.setAttribute('role', 'presentation');
+
+        // Slider container
+        const sliderContainer = document.createElement('div');
+        sliderContainer.className = 'slider-container';
+
+        // Slider input
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = '0';
+        slider.max = '100';
+        slider.value = '100';
+        slider.className = 'slider';
+
+        // Add event listener for slider
+        slider.addEventListener('input', function() {
+            generatedImg.style.setProperty('--clip-position', \`\${this.value}%\`);
+        });
+
+        // Append elements
+        imageWrapper.appendChild(referenceImg);
+        imageWrapper.appendChild(generatedImg);
+        sliderContainer.appendChild(slider);
+        imageContainer.appendChild(imageWrapper);
+        imageContainer.appendChild(sliderContainer);
+        imageGrid.appendChild(imageContainer);
+
+        // Add click event for ranking
+        imageContainer.addEventListener('click', function() {
+            const index = this.getAttribute('data-index');
+            if (!rankingOrder.includes(index)) {
+                rankingOrder.push(index);
+                updateRankingDisplay();
+                this.classList.add('selected');
+            }
+        });
+    });
+
+    // Function to update the ranking display
+    function updateRankingDisplay() {
+        rankingList.innerHTML = '';
+        rankingOrder.forEach((index, rank) => {
+            const item = document.createElement('div');
+            item.className = 'rank-item';
+            
+            const img = document.createElement('img');
+            img.src = generatedImageSources[index];
+            img.alt = '';
+            img.setAttribute('aria-hidden', 'true');
+            img.setAttribute('role', 'presentation');
+            
+            const rankText = document.createElement('span');
+            rankText.textContent = \`Rank \${rank + 1}\`;
+            
+            item.appendChild(img);
+            item.appendChild(rankText);
+            rankingList.appendChild(item);
+        });
+    }
+
+    // Reset button functionality
+    resetBtn.addEventListener('click', function() {
+        rankingOrder = [];
+        updateRankingDisplay();
+        document.querySelectorAll('.image-container').forEach(container => {
+            container.classList.remove('selected');
+        });
+    });
+
+    // Submit button functionality
+    submitBtn.addEventListener('click', function() {
+        if (rankingOrder.length === generatedImageSources.length) {
+            const results = {
+                page: ${pageNumber},
+                timestamp: new Date().toISOString(),
+                ranking: rankingOrder.map(index => ({
+                    rank: rankingOrder.indexOf(index) + 1,
+                    image: generatedImageSources[index]
+                }))
+            };
+            console.log('Ranking Results:', results);
+            // Here you can add code to send results to a server
+            alert('Ranking submitted successfully!');
+        } else {
+            alert('Please rank all images before submitting.');
+        }
+    });
+});`;
+}
+
+// Generate pages 2 through 15 (page 1 is index.html)
+for (let i = 2; i <= 15; i++) {
+    // Generate HTML
+    const html = generateHTML(i, i === 1, i === 15);
+    fs.writeFileSync(`page${i}.html`, html);
+
+    // Generate JavaScript
+    const js = generateJS(i);
+    fs.writeFileSync(`script${i}.js`, js);
+}
+
+console.log('Generated all pages successfully!'); 

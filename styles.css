@@ -252,9 +252,15 @@ button {
 
 .button-container {
     display: flex;
-    justify-content: center;
-    gap: 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
     margin-top: 20px;
+}
+
+.reset-button, .submit-button {
+    width: 100%;
+    max-width: 300px;
 }
 
 .nav-button {
@@ -297,4 +303,16 @@ img {
 .image-container::before,
 .image-container::after {
     display: none !important;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.navigation-buttons .nav-button {
+    flex: 1;
+    max-width: 150px;
 } 
