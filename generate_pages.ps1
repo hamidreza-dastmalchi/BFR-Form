@@ -12,7 +12,11 @@ function Generate-HTML {
     }
     
     $nextButton = if (!$isLast) {
-        "<button onclick=`"window.location.href='page$($pageNumber+1).html'`" class=`"nav-button`">Next</button>"
+        "<button id=`"nextBtn`" onclick=`"window.location.href='page$($pageNumber+1).html'`" class=`"nav-button`" disabled>Next</button>"
+    } else { "" }
+
+    $submitButton = if ($isLast) {
+        "<button id=`"submitBtn`" class=`"submit-button`" disabled>Submit Ranking</button>"
     } else { "" }
     
     return @"
@@ -60,7 +64,7 @@ function Generate-HTML {
 
         <div class="button-container">
             <button id="resetBtn" class="reset-button">Reset Selection</button>
-            <button id="submitBtn" class="submit-button">Submit Ranking</button>
+            $submitButton
             <div class="navigation-buttons">
                 $prevButton
                 $nextButton
@@ -76,7 +80,8 @@ function Generate-HTML {
 # Function to generate JavaScript content
 function Generate-JavaScript {
     param (
-        [int]$pageNumber
+        [int]$pageNumber,
+        [bool]$isLast = ($pageNumber -eq 15)
     )
     
     return @"
@@ -84,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageGrid = document.getElementById('imageGrid');
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
+    const nextBtn = document.getElementById('nextBtn');
     const submitBtn = document.getElementById('submitBtn');
     const referenceImageSrc = 'images/image$pageNumber/ref.png';
     
@@ -100,6 +106,14 @@ document.addEventListener('DOMContentLoaded', function() {
         'images/image$pageNumber/gen6.png',
         'images/image$pageNumber/gen7.png'
     ];
+
+    // Function to check if all images are ranked
+    function checkAllImagesRanked() {
+        const allRanked = rankingOrder.length === generatedImageSources.length;
+        if (nextBtn) nextBtn.disabled = !allRanked;
+        if (submitBtn) submitBtn.disabled = !allRanked;
+        return allRanked;
+    }
 
     // Create image containers with sliders
     generatedImageSources.forEach((generatedImageSrc, index) => {
@@ -160,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 rankingOrder.push(index);
                 updateRankingDisplay();
                 this.classList.add('selected');
+                checkAllImagesRanked();
             }
         });
     });
@@ -193,26 +208,30 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.image-container').forEach(container => {
             container.classList.remove('selected');
         });
+        if (nextBtn) nextBtn.disabled = true;
+        if (submitBtn) submitBtn.disabled = true;
     });
 
-    // Submit button functionality
-    submitBtn.addEventListener('click', function() {
-        if (rankingOrder.length === generatedImageSources.length) {
-            const results = {
-                page: $pageNumber,
-                timestamp: new Date().toISOString(),
-                ranking: rankingOrder.map(index => ({
-                    rank: rankingOrder.indexOf(index) + 1,
-                    image: generatedImageSources[index]
-                }))
-            };
-            console.log('Ranking Results:', results);
-            // Here you can add code to send results to a server
-            alert('Ranking submitted successfully!');
-        } else {
-            alert('Please rank all images before submitting.');
-        }
-    });
+    // Submit button functionality (only on last page)
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+            if (rankingOrder.length === generatedImageSources.length) {
+                const results = {
+                    page: $pageNumber,
+                    timestamp: new Date().toISOString(),
+                    ranking: rankingOrder.map(index => ({
+                        rank: rankingOrder.indexOf(index) + 1,
+                        image: generatedImageSources[index]
+                    }))
+                };
+                console.log('Ranking Results:', results);
+                // Here you can add code to send results to a server
+                alert('Ranking submitted successfully!');
+            } else {
+                alert('Please rank all images before submitting.');
+            }
+        });
+    }
 });
 "@
 }
@@ -235,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $html | Out-File -FilePath "page$pageNumber.html" -Encoding UTF8
     
     # Generate JavaScript
-    $js = Generate-JavaScript -pageNumber $pageNumber
+    $js = Generate-JavaScript -pageNumber $pageNumber -isLast $isLast
     $js | Out-File -FilePath "script$pageNumber.js" -Encoding UTF8
 }
 

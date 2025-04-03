@@ -2,11 +2,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageGrid = document.getElementById('imageGrid');
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
-    const submitBtn = document.getElementById('submitBtn');
+    const nextBtn = document.getElementById('nextBtn');
     const referenceImage = document.getElementById('reference');
 
     let selectedImages = [];
     let currentRank = 1;
+    let rankingOrder = [];
 
     // Set reference image
     referenceImage.src = 'images/image1/ref.png';
@@ -22,10 +23,22 @@ document.addEventListener('DOMContentLoaded', function() {
         '7_PULSE'
     ];
 
+    // Array of generated image sources
+    const generatedImageSources = [
+        'images/image1/gen1.png',
+        'images/image1/gen2.png',
+        'images/image1/gen3.png',
+        'images/image1/gen4.png',
+        'images/image1/gen5.png',
+        'images/image1/gen6.png',
+        'images/image1/gen7.png'
+    ];
+
     // Function to create image comparison container
     function createImageComparison(generatedImageSrc, referenceImageSrc) {
         const container = document.createElement('div');
         container.className = 'image-container';
+        container.setAttribute('data-index', generatedImageSrc);
         
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
@@ -81,11 +94,11 @@ document.addEventListener('DOMContentLoaded', function() {
         rankingList.innerHTML = '';
         selectedImages = [];
         currentRank = 1;
-        submitBtn.disabled = true;
+        rankingOrder = [];
+        nextBtn.disabled = true;
 
         // Add the 7 generated images with comparison sliders
-        imageNames.forEach((imageName, index) => {
-            const generatedImageSrc = `images/image1/${imageName}.jpg`;
+        generatedImageSources.forEach((generatedImageSrc, index) => {
             const referenceImageSrc = 'images/image1/ref.png';
             
             const container = createImageComparison(generatedImageSrc, referenceImageSrc);
@@ -128,8 +141,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Enable submit button when all images are ranked
         if (selectedImages.length === 7) {
-            submitBtn.disabled = false;
+            nextBtn.disabled = false;
         }
+
+        // Add to ranking order
+        rankingOrder.push(container.dataset.imageId - 1);
+        updateRankingDisplay();
     }
 
     // Reset selection
@@ -138,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle form submission
-    submitBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', () => {
         if (selectedImages.length !== 7) return;
 
         // Create the ranking data
@@ -160,6 +177,28 @@ document.addEventListener('DOMContentLoaded', function() {
         //     body: JSON.stringify(rankingData)
         // });
     });
+
+    // Function to update the ranking display
+    function updateRankingDisplay() {
+        rankingList.innerHTML = '';
+        rankingOrder.forEach((index, rank) => {
+            const item = document.createElement('div');
+            item.className = 'rank-item';
+            
+            const img = document.createElement('img');
+            img.src = generatedImageSources[index];
+            img.alt = '';
+            img.setAttribute('aria-hidden', 'true');
+            img.setAttribute('role', 'presentation');
+            
+            const rankText = document.createElement('span');
+            rankText.textContent = `Rank ${rank + 1}`;
+            
+            item.appendChild(img);
+            item.appendChild(rankText);
+            rankingList.appendChild(item);
+        });
+    }
 
     // Load images when the page loads
     loadImages();
