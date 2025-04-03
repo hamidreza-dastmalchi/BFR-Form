@@ -29,41 +29,23 @@
         
         const wrapper = document.createElement('div');
         wrapper.className = 'image-wrapper';
-        wrapper.style.position = 'relative';
-        wrapper.style.width = '100%';
-        wrapper.style.height = '300px';
-        wrapper.style.overflow = 'hidden';
-
-        // Reference image (underneath)
-        const referenceImg = document.createElement('img');
-        referenceImg.className = 'reference-compare-image';
-        referenceImg.src = referenceImageSrc;
-        referenceImg.alt = '';
-        referenceImg.style.position = 'absolute';
-        referenceImg.style.top = '0';
-        referenceImg.style.left = '0';
-        referenceImg.style.width = '100%';
-        referenceImg.style.height = '100%';
-        referenceImg.style.objectFit = 'contain';
-        referenceImg.style.zIndex = '1';
-        referenceImg.setAttribute('aria-hidden', 'true');
-        referenceImg.setAttribute('role', 'presentation');
 
         // Generated image (will be clipped)
         const generatedImg = document.createElement('img');
         generatedImg.className = 'generated-image';
         generatedImg.src = generatedImageSrc;
         generatedImg.alt = '';
-        generatedImg.style.position = 'absolute';
-        generatedImg.style.top = '0';
-        generatedImg.style.left = '0';
-        generatedImg.style.width = '100%';
-        generatedImg.style.height = '100%';
-        generatedImg.style.objectFit = 'contain';
-        generatedImg.style.zIndex = '2';
         generatedImg.setAttribute('aria-hidden', 'true');
         generatedImg.setAttribute('role', 'presentation');
         generatedImg.style.setProperty('--clip-position', '100%');
+
+        // Reference image (underneath)
+        const referenceImg = document.createElement('img');
+        referenceImg.className = 'reference-compare-image';
+        referenceImg.src = referenceImageSrc;
+        referenceImg.alt = '';
+        referenceImg.setAttribute('aria-hidden', 'true');
+        referenceImg.setAttribute('role', 'presentation');
 
         // Slider container
         const sliderContainer = document.createElement('div');
@@ -80,7 +62,7 @@
 
         // Update clip path when slider moves
         slider.addEventListener('input', function() {
-            generatedImg.style.clipPath = `inset(0 calc(100% - ${this.value}%) 0 0)`;
+            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
         });
 
         wrapper.appendChild(referenceImg);
@@ -104,11 +86,9 @@
 
         // Add the 7 generated images with comparison sliders
         generatedImageSources.forEach((generatedImageSrc, index) => {
-            const container = createImageComparison(
-                generatedImageSrc,
-                'images/image4/ref.png',
-                index
-            );
+            const referenceImageSrc = 'images/image4/ref.png';
+            
+            const container = createImageComparison(generatedImageSrc, referenceImageSrc, index);
 
             container.addEventListener('click', (e) => {
                 // Only handle click if not clicking on slider
