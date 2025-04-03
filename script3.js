@@ -1,13 +1,15 @@
-document.addEventListener('DOMContentLoaded', function() {
+﻿document.addEventListener('DOMContentLoaded', function() {
     const imageGrid = document.getElementById('imageGrid');
     const rankingList = document.getElementById('rankingList');
     const resetBtn = document.getElementById('resetBtn');
+    const nextBtn = document.getElementById('nextBtn');
     const submitBtn = document.getElementById('submitBtn');
     const referenceImageSrc = 'images/image3/ref.png';
     
-    // Array to store the ranking order
+    let selectedImages = [];
+    let currentRank = 1;
     let rankingOrder = [];
-    
+
     // Array of generated image sources
     const generatedImageSources = [
         'images/image3/gen1.png',
@@ -18,6 +20,14 @@ document.addEventListener('DOMContentLoaded', function() {
         'images/image3/gen6.png',
         'images/image3/gen7.png'
     ];
+
+    // Function to check if all images are ranked
+    function checkAllImagesRanked() {
+        const allRanked = rankingOrder.length === generatedImageSources.length;
+        if (nextBtn) nextBtn.disabled = !allRanked;
+        if (submitBtn) submitBtn.disabled = !allRanked;
+        return allRanked;
+    }
 
     // Create image containers with sliders
     generatedImageSources.forEach((generatedImageSrc, index) => {
@@ -60,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add event listener for slider
         slider.addEventListener('input', function() {
-            generatedImg.style.setProperty('--clip-position', `${this.value}%`);
+            generatedImg.style.setProperty('--clip-position', ${this.value}%);
         });
 
         // Append elements
@@ -72,12 +82,27 @@ document.addEventListener('DOMContentLoaded', function() {
         imageGrid.appendChild(imageContainer);
 
         // Add click event for ranking
-        imageContainer.addEventListener('click', function() {
+        imageContainer.addEventListener('click', function(e) {
+            // Ignore clicks on the slider
+            if (e.target.classList.contains('slider')) return;
+            
             const index = this.getAttribute('data-index');
             if (!rankingOrder.includes(index)) {
                 rankingOrder.push(index);
                 updateRankingDisplay();
                 this.classList.add('selected');
+                
+                selectedImages.push({
+                    imageId: index,
+                    rank: rankingOrder.length
+                });
+                currentRank++;
+
+                // Check if all images are ranked
+                if (selectedImages.length === 7) {
+                    if (nextBtn) nextBtn.disabled = false;
+                    if (submitBtn) submitBtn.disabled = false;
+                }
             }
         });
     });
@@ -96,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
             img.setAttribute('role', 'presentation');
             
             const rankText = document.createElement('span');
-            rankText.textContent = `Rank ${rank + 1}`;
+            rankText.textContent = Rank ;
             
             item.appendChild(img);
             item.appendChild(rankText);
@@ -107,28 +132,80 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reset button functionality
     resetBtn.addEventListener('click', function() {
         rankingOrder = [];
+        selectedImages = [];
+        currentRank = 1;
         updateRankingDisplay();
         document.querySelectorAll('.image-container').forEach(container => {
             container.classList.remove('selected');
         });
+        if (nextBtn) nextBtn.disabled = true;
+        if (submitBtn) submitBtn.disabled = true;
     });
 
-    // Submit button functionality
-    submitBtn.addEventListener('click', function() {
-        if (rankingOrder.length === generatedImageSources.length) {
-            const results = {
-                page: 3,
-                timestamp: new Date().toISOString(),
-                ranking: rankingOrder.map(index => ({
-                    rank: rankingOrder.indexOf(index) + 1,
-                    image: generatedImageSources[index]
-                }))
-            };
-            console.log('Ranking Results:', results);
-            // Here you can add code to send results to a server
-            alert('Ranking submitted successfully!');
-        } else {
-            alert('Please rank all images before submitting.');
-        }
-    });
+    // Next button functionality
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (selectedImages.length === 7) {
+                // Save the current page's ranking to localStorage
+                localStorage.setItem('ranking_page_3', JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    ranking: rankingOrder.map(index => ({
+                        rank: rankingOrder.indexOf(index) + 1,
+                        image: generatedImageSources[index]
+                    }))
+                }));
+                
+                // Navigate to next page
+                window.location.replace('page4.html');
+            }
+        });
+    }
+
+    // Submit button functionality (only on last page)
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+            if (selectedImages.length === 7) {
+                // Save the last page's ranking
+                localStorage.setItem('ranking_page_3', JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    ranking: rankingOrder.map(index => ({
+                        rank: rankingOrder.indexOf(index) + 1,
+                        image: generatedImageSources[index]
+                    }))
+                }));
+
+                // Collect all rankings
+                const allRankings = {};
+                for (let i = 1; i <= 15; i++) {
+                    const pageRanking = localStorage.getItem(anking_page_);
+                    if (pageRanking) {
+                        allRankings[page_] = JSON.parse(pageRanking);
+                    }
+                }
+
+                console.log('All Rankings:', allRankings);
+                alert('All rankings submitted successfully!');
+            } else {
+                alert('Please rank all images before submitting.');
+            }
+        });
+    }
+
+    // Check if there's saved ranking for this page
+    const savedRanking = localStorage.getItem('ranking_page_3');
+    if (savedRanking) {
+        const data = JSON.parse(savedRanking);
+        rankingOrder = data.ranking.map(r => {
+            const index = generatedImageSources.findIndex(src => src === r.image);
+            return index.toString();
+        });
+        updateRankingDisplay();
+        document.querySelectorAll('.image-container').forEach(container => {
+            if (rankingOrder.includes(container.getAttribute('data-index'))) {
+                container.classList.add('selected');
+            }
+        });
+        checkAllImagesRanked();
+    }
 });

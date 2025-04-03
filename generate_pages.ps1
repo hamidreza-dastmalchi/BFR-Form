@@ -300,15 +300,15 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 # Create image directories
-4..15 | ForEach-Object {
+2..15 | ForEach-Object {
     $dir = "images/image$_"
     if (!(Test-Path $dir)) {
         New-Item -ItemType Directory -Path $dir -Force
     }
 }
 
-# Generate pages 4 through 15
-4..15 | ForEach-Object {
+# Generate pages 2 through 15
+2..15 | ForEach-Object {
     $pageNumber = $_
     $isLast = $pageNumber -eq 15
     
